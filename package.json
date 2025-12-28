@@ -1,7 +1,7 @@
 {
-  "name": "@sot1986/appsync-precognition",
+  "name": "@sot1986/appsync-validator",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "JavaScript resolver validation utilities for AWS AppSync",
   "author": "sot1986",
   "license": "MIT",
@@ -29,6 +29,7 @@
     "build": "tsdown --format esm --config tsdown.config.ts",
     "bundle": "cd playground && ./bundle-resolvers.sh && cd .. && eslint --ext playground/resolvers/**/*.{ts,js} . --fix",
     "prepublishOnly": "pnpm run build",
+    "test": "vitest",
     "lint:resolvers": "eslint --ext playground/resolvers/**/*.{ts,js} . --fix"
   },
   "peerDependencies": {
