@@ -1,6 +1,6 @@
 import type { Context } from '@aws-appsync/utils'
 import { util } from '@aws-appsync/utils'
-import { validate } from '@sot1986/appsync-validator'
+import { validate } from '@sot1986/appsync-precognition'
 
 interface User {
   name: string
