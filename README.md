@@ -1,1 +1,1 @@
-# appsync-validator
+# appsync-precognition

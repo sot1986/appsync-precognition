@@ -1,5 +1,5 @@
 {
-  "name": "@sot1986/appsync-validator",
+  "name": "@sot1986/appsync-precognition",
   "type": "module",
   "version": "0.0.1",
   "description": "JavaScript resolver validation utilities for AWS AppSync",
