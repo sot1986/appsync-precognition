@@ -1,0 +1,11 @@
+{
+  "name": "playground",
+  "type": "module",
+  "private": true,
+  "peerDependencies": {
+    "@aws-appsync/utils": "^2.0.3"
+  },
+  "devDependencies": {
+    "@sot1986/appsync-validator": "file:../"
+  }
+}

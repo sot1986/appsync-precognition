@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true
+  },
+  "include": [
+    "resolvers/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
