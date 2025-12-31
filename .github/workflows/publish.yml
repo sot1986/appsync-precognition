@@ -41,6 +41,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+      - name: Add build files
+        run: git add .
       - name: Bump version
         run: npm version patch
       - name: Push changes
