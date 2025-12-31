@@ -1,3 +1,4 @@
+import type { Context } from '@aws-appsync/utils'
 import type { NestedKeyOf } from './types'
 import { util } from '@aws-appsync/utils'
 
@@ -29,4 +30,29 @@ export function setNestedValue<T extends object>(obj: T, path: NestedKeyOf<T>, v
   if (typeof parentObject === 'object' && !!parentObject) {
     parentObject[lastKey] = value
   }
+}
+
+export function getHeader(name: string, ctx: Context): string | null {
+  return Object.entries(ctx.request.headers)
+    .reduce((prev, [key, value]) => typeof prev === 'string'
+      ? prev
+      : (key.toLowerCase() === name.toLowerCase() && typeof value === 'string'
+          ? value
+          : null), null as string | null)
+}
+
+export function isPrecognitiveRequest(ctx: Context): boolean {
+  return getHeader('precognition', ctx) === 'true'
+}
+
+export function precognitiveKeys(ctx: Context): string[] | null {
+  const keys = getHeader('Precognition-Validate-Only', ctx)
+  return keys ? keys.split(',').map(key => key.trim()) : null
+}
+
+export function cleanString(value: string): string | null {
+  let parsed: string | null = value.trim()
+  if (parsed === '')
+    parsed = null
+  return parsed
 }

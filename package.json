@@ -9,7 +9,8 @@
     "appsync",
     "validation",
     "resolver",
-    "aws"
+    "aws",
+    "precognition"
   ],
   "exports": {
     ".": {
