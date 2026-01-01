@@ -29,7 +29,7 @@
   "scripts": {
     "build": "tsdown --format esm --config tsdown.config.ts",
     "bundle": "cd playground && ./bundle-resolvers.sh && cd .. && eslint --ext playground/resolvers/**/*.{ts,js} . --fix",
-    "prepublishOnly": "pnpm run build",
+    "prepublishOnly": "npm run build",
     "test": "vitest",
     "lint:resolvers": "eslint --ext playground/resolvers/**/*.{ts,js} . --fix"
   },
