@@ -1,5 +1,3 @@
-import type { util } from '@aws-appsync/utils'
-
 interface UtilError {
   msg: string
   errorType?: string
@@ -7,7 +5,7 @@ interface UtilError {
   errorInfo?: any
 }
 
-class AppsyncError extends Error {
+export class AppsyncError extends Error {
   public errors: UtilError[] = []
 
   public constructor(message: string) {
@@ -17,30 +15,30 @@ class AppsyncError extends Error {
 
 export function mockUtil() {
   const errors: UtilError[] = []
-  function appendError(...params: Parameters<typeof util.appendError>) {
+  function appendError(msg: string, errorType?: string | undefined, data?: any, errorInfo?: any) {
     errors.push({
-      msg: params[0],
-      errorType: params.at(1),
-      data: params.at(2),
-      errorInfo: params.at(3),
+      msg,
+      errorType,
+      data,
+      errorInfo,
     })
   }
-  function error(...params: Parameters<typeof util.error>) {
+  function error(msg: string, errorType?: string | undefined, data?: any, errorInfo?: any) {
     errors.push({
-      msg: params[0],
-      errorType: params.at(1),
-      data: params.at(2),
-      errorInfo: params.at(3),
+      msg,
+      errorType,
+      data,
+      errorInfo,
     })
 
-    const err = new AppsyncError(params[0])
+    const err = new AppsyncError(msg)
     err.errors.push(...errors)
     throw err
   }
 
-  function matches(...params: Parameters<typeof util.matches>) {
-    const regex = new RegExp(params[0])
-    return !!params[1].match(regex)
+  function matches(pattern: string, value: string) {
+    const regex = new RegExp(pattern)
+    return !!value.match(regex)
   }
 
   return {

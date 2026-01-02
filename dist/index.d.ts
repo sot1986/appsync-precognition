@@ -28,6 +28,7 @@ declare const names: {
   readonly email: "email";
   readonly url: "url";
   readonly uuid: "uuid";
+  readonly ulid: "ulid";
   readonly regex: "regex";
   readonly in: "in";
   readonly notIn: "notIn";
@@ -39,7 +40,8 @@ declare function requiredRule<T>(value: T, ..._params: string[]): Rule<T>;
 //#endregion
 //#region src/index.d.ts
 declare function validate<T extends object>(obj: T, checks: Partial<Record<NestedKeyOf<T>, (ShortRule<keyof typeof rules_d_exports["names"]> | Rule)[]>>): T;
-declare function precognition<T extends object>(ctx: Context<T>, checks: Partial<Record<NestedKeyOf<T>, (ShortRule<keyof typeof rules_d_exports["names"]> | Rule)[]>>): T;
+declare function precognitiveValidation<T extends object>(ctx: Context<T>, checks: Partial<Record<NestedKeyOf<T>, (ShortRule<keyof typeof rules_d_exports["names"]> | Rule)[]>>): T;
+declare function formatAttributeName(path: string): string;
 //#endregion
-export { precognition, validate };
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguZC50cyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIuLi9zcmMvdHlwZXMudHMiLCIuLi9zcmMvcnVsZXMudHMiLCIuLi9zcmMvaW5kZXgudHMiXSwic291cmNlc0NvbnRlbnQiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7VUFFaUI7OztTQUdSOztLQUdHLDhCQUE4QixPQUFPO0tBRTVDLGlDQUNELG9DQUNFLFVBQVU7S0FPWCwrQkFDRCxzQkFDRSxVQUFVLFdBQ0o7VUFFRixjQUFBOzs7S0FJRSxpQkFBaUIsVUFBVSw2QkFDbkMsVUFBVSx5QkFFUixVQUFVLDBEQUdMLFdBQVcsTUFBTSxFQUFFLHlCQUNiLFdBQVcsS0FBSyxHQUFHLFNBQVMsWUFBWSxFQUFFLFVBQzdDLHNCQUNFLDRDQUVFLHdDQUNlLFlBQVk7Ozs7Y0NwQ2hDOzs7Ozs7Ozs7Ozs7Ozs7O2lCQWlCRyxnQkFBZ0IsU0FBUyx1QkFBdUIsU0FBUyxLQUFLO2lCQXVLOUQsdUJBQXVCLDBCQUEwQixLQUFLOzs7aUJDdEx0RCxnQ0FDVCxXQUNHLFFBQVEsT0FBTyxZQUFZLEtBQUssdUJBQXVCLDRCQUFrQixZQUNoRjtpQkEyQ2Esb0NBQ1QsUUFBUSxZQUNMLFFBQVEsT0FBTyxZQUFZLEtBQUssdUJBQXVCLDRCQUFrQixZQUNoRiJ9
+export { formatAttributeName, precognitiveValidation, validate };
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguZC50cyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIuLi9zcmMvdHlwZXMudHMiLCIuLi9zcmMvcnVsZXMudHMiLCIuLi9zcmMvaW5kZXgudHMiXSwic291cmNlc0NvbnRlbnQiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7VUFFaUI7OztTQUdSOztLQUdHLDhCQUE4QixPQUFPO0tBRTVDLGlDQUNELG9DQUNFLFVBQVU7S0FPWCwrQkFDRCxzQkFDRSxVQUFVLFdBQ0o7VUFFRixjQUFBOzs7S0FJRSxpQkFBaUIsVUFBVSw2QkFDbkMsVUFBVSx5QkFFUixVQUFVLDBEQUdMLFdBQVcsTUFBTSxFQUFFLHlCQUNiLFdBQVcsS0FBSyxHQUFHLFNBQVMsWUFBWSxFQUFFLFVBQzdDLHNCQUNFLDRDQUVFLHdDQUNlLFlBQVk7Ozs7Y0NwQ2hDOzs7Ozs7Ozs7Ozs7Ozs7OztpQkFrQkcsZ0JBQWdCLFNBQVMsdUJBQXVCLFNBQVMsS0FBSztpQkEwTTlELHVCQUF1QiwwQkFBMEIsS0FBSzs7O2lCQzFOdEQsZ0NBQ1QsV0FDRyxRQUFRLE9BQU8sWUFBWSxLQUFLLHVCQUF1Qiw0QkFBa0IsWUFDaEY7aUJBNENhLDhDQUNULFFBQVEsWUFDTCxRQUFRLE9BQU8sWUFBWSxLQUFLLHVCQUF1Qiw0QkFBa0IsWUFDaEY7aUJBd0JhLG1CQUFBIn0=

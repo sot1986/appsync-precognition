@@ -35,6 +35,7 @@ export function validate<T extends object>(
       if (result.check)
         return
       hasErrors = true
+      result.message = result.message.replace(':attribute', formatAttributeName(path))
       errorMessages.push(result.message)
       util.appendError(result.message, 'ValidationError', null, { path, value })
       if (rule === 'required') {
@@ -50,7 +51,7 @@ export function validate<T extends object>(
   return obj
 }
 
-export function precognition<T extends object>(
+export function precognitiveValidation<T extends object>(
   ctx: Context<T>,
   checks: Partial<Record<NestedKeyOf<T>, (ShortRule<keyof typeof rules['names']> | Rule)[]>>,
 ): T {
@@ -75,4 +76,13 @@ export function precognition<T extends object>(
   validate(ctx.args, precognitionChecks)
   util.http.addResponseHeader('Precognition-Success', 'true')
   runtime.earlyReturn(null)
+}
+
+export function formatAttributeName(path: string): string {
+  return path.split('.').reduce((acc, part) => {
+    if (util.matches('^\d+$', part)) {
+      return acc
+    }
+    return acc ? `${acc} ${part.toLowerCase()}` : part.toLowerCase()
+  }, '')
 }

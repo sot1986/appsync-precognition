@@ -12,6 +12,7 @@ export const names = {
   email: 'email',
   url: 'url',
   uuid: 'uuid',
+  ulid: 'ulid',
   regex: 'regex',
   in: 'in',
   notIn: 'notIn',
@@ -32,19 +33,23 @@ export function parse<T>(value: T, rule: ShortRule<keyof typeof names>): Rule<T>
     case 'min':
       return minRule(value, ...params.split(','))
     case 'max':
-      return maxRule(value, ...params.split(', '))
+      return maxRule(value, ...params.split(','))
     case 'between':
-      return betweenRule(value, ...params.split(', '))
+      return betweenRule(value, ...params.split(','))
     case 'email':
       return emailRule(value)
     case 'url':
       return urlRule(value)
     case 'uuid':
       return uuidRule(value)
+    case 'ulid':
+      return ulidRule(value)
     case 'regex':
       return regexRule(value, params)
     case 'in':
-      return inRule(value, ...params.split(', '))
+      return inRule(value, ...params.split(','))
+    case 'notIn':
+      return notInRule(value, ...params.split(','))
     default:
       return { check: false, message: `Unknown rule ${ruleName}`, value }
   }
@@ -122,7 +127,7 @@ function emailRule<T>(value: T): Rule<T> {
   }
 
   if (typeof value === 'string') {
-    result.check = util.matches('^[^\s@]+@[^\s@]+\.[^\s@]+$', result.value as string)
+    result.check = util.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$', result.value as string)
   }
   return result
 }
@@ -135,7 +140,7 @@ function urlRule<T>(value: T): Rule<T> {
   }
   if (typeof value === 'string') {
     result.check = util.matches(
-      '^(http|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&:/~\\+#]*[\\w\\-\\@?^=%&/~\\+#])?$',
+      '^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$|^https?:\\/\\/(localhost|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d+)?(\\/.*)?$',
       result.value as string,
     )
   }
@@ -151,6 +156,22 @@ function uuidRule<T>(value: T): Rule<T> {
   if (typeof result.value === 'string') {
     result.check = util.matches(
       '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+      value as string,
+    )
+  }
+  return result
+}
+
+function ulidRule<T>(value: T): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: ':attribute must be a valid ULID',
+    value,
+  }
+  if (typeof result.value === 'string') {
+    // ULID format: 26 characters, base32 encoded (0-9, A-Z excluding I, L, O, U)
+    result.check = util.matches(
+      '^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$',
       value as string,
     )
   }
@@ -186,6 +207,21 @@ function inRule<T>(value: T, ...params: string[]): Rule<T> {
   return result
 }
 
+function notInRule<T>(value: T, ...params: string[]): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: ':attribute must not be one of the specified values',
+    value,
+  }
+  if (typeof result.value === 'string') {
+    result.check = !params.includes(result.value)
+  }
+  if (typeof value === 'number') {
+    result.check = !params.map(Number).includes(value)
+  }
+  return result
+}
+
 export function requiredRule<T>(value: T, ..._params: string[]): Rule<T> {
   const result: Rule<T> = {
     check: true,
@@ -201,8 +237,15 @@ export function requiredRule<T>(value: T, ..._params: string[]): Rule<T> {
   if (typeof result.value === 'number') {
     result.check = true
   }
-  if (result.check === false) {
-    result.message = ':attribute is required'
+  if (typeof value === 'boolean') {
+    result.check = true
+  }
+  if (typeof result.value === 'object' && !result.value) {
+    result.message = ':attribute is not nullable'
+    result.check = false
+  }
+  if (typeof result.value === 'undefined') {
+    result.check = false
   }
   return result
 }
@@ -224,6 +267,10 @@ function sometimesRule<T>(value: T, ..._params: string[]): Rule<T> {
   }
   if (typeof result.value === 'undefined') {
     return result
+  }
+  if (typeof result.value === 'object' && !result.value) {
+    result.message = ':attribute is not nullable'
+    result.check = false
   }
   return requiredRule(value, ..._params)
 }

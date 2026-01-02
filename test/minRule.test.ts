@@ -1,13 +1,57 @@
 import { describe, expect, it } from 'vitest'
 import * as rules from '../src/rules'
 
-describe('test minRule validation', () => {
-  it.each([
+describe.concurrent('test minRule validation', () => {
+  it.concurrent.each([
     'aa',
     'a'.repeat(10),
     'a'.repeat(500),
   ])('validates min lenght string', (value) => {
     const result = rules.parse(value, 'min:2')
     expect(result.check).toBe(true)
+  })
+
+  // apply similar testing as done in test/maxRule.test.ts
+  it.concurrent.each([
+    'a',
+    null,
+  ])('invalidates min lenght string', (value) => {
+    const result = rules.parse(value, 'min:2')
+    expect(result.check).toBe(false)
+  })
+
+  // apply test for array input value
+  it.concurrent.each([
+    [1, 2, 3] as unknown[],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as unknown[],
+  ])('validates min lenght array', (...value) => {
+    const result = rules.parse(value, 'min:2')
+    expect(result.check).toBe(true)
+  })
+
+  it.concurrent.each([
+    [1] as unknown[],
+    [null],
+  ])('invalidates min lenght array', (...value) => {
+    const result = rules.parse(value, 'min:2')
+    expect(result.check).toBe(false)
+  })
+
+  // apply test for number input value
+  it.concurrent.each([
+    2,
+    2.0,
+  ])('validates min number', (value) => {
+    const result = rules.parse(value, 'min:2')
+    expect(result.check).toBe(true)
+  })
+
+  it.concurrent.each([
+    1,
+    0,
+    -5,
+  ])('invalidates min lenght number', (value) => {
+    const result = rules.parse(value, 'min:2')
+    expect(result.check).toBe(false)
   })
 })
