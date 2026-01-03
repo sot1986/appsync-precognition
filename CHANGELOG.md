@@ -1,3 +1,10 @@
+## [0.1.2](https://github.com/sot1986/appsync-precognition/compare/v0.1.1...v0.1.2) (2026-01-03)
+
+
+### Bug Fixes
+
+* reduce dependecy from Context ([4f1915f](https://github.com/sot1986/appsync-precognition/commit/4f1915f903cc700a4bbca69e4efeefafc988a16b))
+
 ## [0.1.1](https://github.com/sot1986/appsync-precognition/compare/v0.1.0...v0.1.1) (2026-01-03)
 
 
