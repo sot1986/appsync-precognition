@@ -1,3 +1,3 @@
 # appsync-precognition
 
-Lean validation library for Appsync JS runtime, implementing Precognition protocol
+Lean validation library for Appsync JS runtime, implementing Precognition protocol.
