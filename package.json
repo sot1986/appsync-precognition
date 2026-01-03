@@ -1,7 +1,7 @@
 {
   "name": "@sot1986/appsync-precognition",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "JavaScript resolver validation utilities for AWS AppSync",
   "author": "sot1986",
   "license": "MIT",
