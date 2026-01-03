@@ -1,3 +1,10 @@
+## [0.1.1](https://github.com/sot1986/appsync-precognition/compare/v0.1.0...v0.1.1) (2026-01-03)
+
+
+### Bug Fixes
+
+* minor Readme.md update ([1cca89b](https://github.com/sot1986/appsync-precognition/commit/1cca89b7fec596914d01ed01ff20bc3f2c8f55f0))
+
 # [0.1.0](https://github.com/sot1986/appsync-precognition/compare/v0.0.4...v0.1.0) (2026-01-03)
 
 
