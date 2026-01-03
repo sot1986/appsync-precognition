@@ -64,16 +64,21 @@ export function validate<T extends object>(
 
 export function precognitiveValidation<T extends object>(
   ctx: Context<T>,
-  checks: Partial<Record<NestedKeyOf<T>, (| Rule)[]>>,
+  checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule)[]>>,
+  options?: {
+    trim?: boolean
+    allowEmptyString?: boolean
+    skipTo?: 'END' | 'NEXT'
+  },
 ): T {
   if (!isPrecognitiveRequest(ctx)) {
-    return validate(ctx.args, checks)
+    return validate(ctx.args, checks, options)
   }
   const validationKeys = precognitiveKeys(ctx)
   util.http.addResponseHeader('Precognition', 'true')
 
   if (!validationKeys) {
-    validate(ctx.args, checks)
+    validate(ctx.args, checks, options)
     util.http.addResponseHeader('Precognition-Success', 'true')
     runtime.earlyReturn(null)
   }
@@ -84,9 +89,9 @@ export function precognitiveValidation<T extends object>(
     precognitionChecks[key as NestedKeyOf<T>] = checks[key as NestedKeyOf<T>]
   })
 
-  validate(ctx.args, precognitionChecks)
+  validate(ctx.args, precognitionChecks, options)
   util.http.addResponseHeader('Precognition-Success', 'true')
-  runtime.earlyReturn(null)
+  runtime.earlyReturn(null, { skipTo: options?.skipTo ?? 'END' })
 }
 
 export function formatAttributeName(path: string): string {

@@ -28,6 +28,8 @@ export type FullRule
     | ['notIn', ...(string | number | boolean | null)[]]
     | ['after', string]
     | ['before', string]
+    | ['afterOrEqual', string]
+    | ['beforeOrEqual', string]
 
 type ArrayKeys<T extends unknown[]>
   = T extends [unknown, ...unknown[]]

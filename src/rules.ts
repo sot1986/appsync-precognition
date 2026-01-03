@@ -18,9 +18,8 @@ export function parse<T>(value: T, rule: FullRule): Rule<T> {
       return minRule(value, (params[0]! as number))
     case 'max':
       return maxRule(value, (params[0] as number))
-    case 'between': {
+    case 'between':
       return betweenRule(value, (params[0] as number), params[1] as number)
-    }
     case 'email':
       return emailRule(value)
     case 'url':
@@ -33,9 +32,8 @@ export function parse<T>(value: T, rule: FullRule): Rule<T> {
       return regexRule(value, params[0] as string)
     case 'in':
       return inRule(value, ...params)
-    case 'notIn': {
+    case 'notIn':
       return notInRule(value, ...params)
-    }
     case 'array':
       return arrayRule(value)
     case 'object':
@@ -48,6 +46,14 @@ export function parse<T>(value: T, rule: FullRule): Rule<T> {
       return stringRule(value)
     case 'date':
       return dateRule(value)
+    case 'before':
+      return beforeRule(value, params[0] as string)
+    case 'after':
+      return afterRule(value, params[0] as string)
+    case 'beforeOrEqual':
+      return beforeOrEqualRule(value, params[0] as string)
+    case 'afterOrEqual':
+      return afterOrEqualRule(value, params[0] as string)
     default:
       return { check: false, message: `Unknown rule ${name}`, value }
   }
@@ -322,12 +328,88 @@ function dateRule<T>(value: T): Rule<T> {
   }
   if (typeof value === 'string') {
     result.check = util.matches(
-      '^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3,6}Z$',
+      '^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$',
       result.value as string,
     )
   }
   if (typeof value === 'number') {
     result.check = true
+  }
+  return result
+}
+
+function beforeRule<T>(value: T, start: string): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: `:attribute must be before ${start}`,
+    value,
+  }
+  const startValue = util.time.parseISO8601ToEpochMilliSeconds(start)
+
+  if (typeof value === 'string') {
+    const date = util.time.parseISO8601ToEpochMilliSeconds(value)
+    result.check = date < startValue
+  }
+
+  if (typeof value === 'number') {
+    result.check = value < startValue
+  }
+  return result
+}
+
+function afterRule<T>(value: T, start: string): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: `:attribute must be after ${start}`,
+    value,
+  }
+  const startValue = util.time.parseISO8601ToEpochMilliSeconds(start)
+
+  if (typeof value === 'string') {
+    const date = util.time.parseISO8601ToEpochMilliSeconds(value)
+    result.check = date > startValue
+  }
+
+  if (typeof value === 'number') {
+    result.check = value > startValue
+  }
+  return result
+}
+
+function beforeOrEqualRule<T>(value: T, start: string): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: `:attribute must be before or equal to ${start}`,
+    value,
+  }
+  const startValue = util.time.parseISO8601ToEpochMilliSeconds(start)
+
+  if (typeof value === 'string') {
+    const date = util.time.parseISO8601ToEpochMilliSeconds(value)
+    result.check = date <= startValue
+  }
+
+  if (typeof value === 'number') {
+    result.check = value <= startValue
+  }
+  return result
+}
+
+function afterOrEqualRule<T>(value: T, start: string): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: `:attribute must be after or equal to ${start}`,
+    value,
+  }
+  const startValue = util.time.parseISO8601ToEpochMilliSeconds(start)
+
+  if (typeof value === 'string') {
+    const date = util.time.parseISO8601ToEpochMilliSeconds(value)
+    result.check = date >= startValue
+  }
+
+  if (typeof value === 'number') {
+    result.check = value >= startValue
   }
   return result
 }
