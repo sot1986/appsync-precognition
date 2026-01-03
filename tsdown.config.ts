@@ -11,4 +11,6 @@ export default defineConfig({
     dts: '.d.ts',
     js: '.js',
   }),
+  clean: true,
+  format: 'esm',
 })
