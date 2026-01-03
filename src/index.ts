@@ -4,9 +4,9 @@ import { runtime, util } from '@aws-appsync/utils'
 import * as rules from './rules'
 import { cleanString, getNestedValue, isArray, isPrecognitiveRequest, precognitiveKeys, setNestedValue } from './utils'
 
-export function validate<T extends object>(
-  obj: T,
-  checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule)[]>>,
+export function validate<T extends { [key in keyof T & string]: T[key] }>(
+  obj: Partial<T>,
+  checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule<T>)[]>>,
   options?: {
     trim?: boolean
     allowEmptyString?: boolean
@@ -56,15 +56,17 @@ export function validate<T extends object>(
   })
 
   if (!error.msg) {
-    return obj
+    return obj as T
   }
 
   util.error(error.msg, error.errorType, error.data, error.errorInfo)
 }
 
-export function precognitiveValidation<T extends object>(
-  ctx: Context<T>,
-  checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule)[]>>,
+export function precognitiveValidation<
+  T extends { [key in keyof T & string]: T[key] },
+>(
+  ctx: Context<Partial<T>>,
+  checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule<T>)[]>>,
   options?: {
     trim?: boolean
     allowEmptyString?: boolean
@@ -72,7 +74,7 @@ export function precognitiveValidation<T extends object>(
   },
 ): T {
   if (!isPrecognitiveRequest(ctx)) {
-    return validate(ctx.args, checks, options)
+    return validate<T>(ctx.args, checks, options)
   }
   const validationKeys = precognitiveKeys(ctx)
   util.http.addResponseHeader('Precognition', 'true')
