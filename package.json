@@ -34,6 +34,7 @@
     "build": "tsdown --format esm --config tsdown.config.ts",
     "bundle": "cd playground && ./bundle-resolvers.sh && cd .. && eslint --ext playground/resolvers/**/*.{ts,js} . --fix",
     "test": "vitest",
+    "test:coverage": "vitest --coverage",
     "lint:resolvers": "eslint --ext playground/resolvers/**/*.{ts,js} . --fix"
   },
   "peerDependencies": {
@@ -44,6 +45,7 @@
     "@aws-appsync/eslint-plugin": "^2.0.2",
     "@types/node": "^25.0.3",
     "@typescript-eslint/parser": "^8.50.1",
+    "@vitest/coverage-v8": "^4.0.16",
     "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
     "tsdown": "^0.18.3",

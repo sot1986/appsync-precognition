@@ -96,7 +96,7 @@ export function precognitiveValidation<T extends object>(
 
 export function formatAttributeName(path: string): string {
   return path.split('.').reduce((acc, part) => {
-    if (util.matches('^\d+$', part)) {
+    if (util.matches('^\\d+$', part)) {
       return acc
     }
     return acc ? `${acc} ${part.toLowerCase()}` : part.toLowerCase()

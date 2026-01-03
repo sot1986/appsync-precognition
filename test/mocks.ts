@@ -26,16 +26,23 @@ export function mockUtil() {
     })
   }
   function error(msg: string, errorType?: string | undefined, data?: any, errorInfo?: any) {
-    errors.push({
-      msg,
-      errorType,
-      data,
-      errorInfo,
-    })
+    try {
+      errors.push({
+        msg,
+        errorType,
+        data,
+        errorInfo,
+      })
 
-    const err = new AppsyncError(msg)
-    err.errors.push(...errors)
-    throw err
+      const err = new AppsyncError(msg)
+      errors.forEach((error) => {
+        err.errors.push(error)
+      })
+      throw err
+    }
+    finally {
+      errors.splice(0, errors.length)
+    }
   }
 
   function matches(pattern: string, value: string) {

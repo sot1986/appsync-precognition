@@ -127,7 +127,7 @@ function emailRule<T>(value: T): Rule<T> {
   }
 
   if (typeof value === 'string') {
-    result.check = util.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$', result.value as string)
+    result.check = util.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$', value)
   }
   return result
 }

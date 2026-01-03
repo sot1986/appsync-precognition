@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { validate } from '../src/index'
 import { AppsyncError } from './mocks'
 
@@ -10,7 +10,11 @@ vi.mock('@aws-appsync/utils', async () => {
   }
 })
 
-describe.concurrent('test validate function', () => {
+describe('test validate function', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it.each([
     {
       name: 'Marco',
@@ -28,7 +32,7 @@ describe.concurrent('test validate function', () => {
       'age': ['required', ['min', 18]],
       'address.address': ['required'],
       'address.cap': ['required', ['between', 2, 10]],
-      'phone': ['sometimes', ['regex', '^\+39\d+$']],
+      'phone': ['sometimes', ['regex', '^\\+39\\d+$']],
     })
     expect(result).toEqual(data)
   })
@@ -51,7 +55,7 @@ describe.concurrent('test validate function', () => {
         'age': ['required', ['min', 18]],
         'address.address': ['required'],
         'address.cap': ['required', ['between', 2, 10]],
-        'phone': ['required', ['regex', '^\+39\d+$']],
+        'phone': ['required', ['regex', '^\\+39\\d+$']],
       })
       expect(true).toBe(false)
     }
@@ -69,6 +73,91 @@ describe.concurrent('test validate function', () => {
         path: 'phone',
         value: undefined,
       })
+    }
+  })
+
+  it.each([
+    {
+      name: 'Marco',
+      age: 25,
+      phone: null,
+      email: 'marco@example.com',
+    },
+  ])('passes with nullable field set to null', (data) => {
+    const result = validate(data, {
+      name: ['required'],
+      age: ['required'],
+      phone: ['nullable', ['regex', '^\\+39\\d+$']], // nullable allows null
+      email: ['required', 'email'],
+    })
+    expect(result).toEqual(data)
+  })
+
+  it.each([
+    {
+      name: 'Marco',
+      age: 25,
+      phone: '+393331234567',
+      email: 'marco@example.com',
+    },
+  ])('passes with nullable field having valid value', (data) => {
+    const result = validate(data, {
+      name: ['required'],
+      age: ['required'],
+      phone: ['required', 'string', ['regex', '^\\+39\\d+$']], // nullable allows valid values
+      email: ['nullable', 'string', 'email'],
+    })
+    expect(result).toEqual(data)
+  })
+
+  it.each([
+    {
+      name: 'Marco',
+      age: 25,
+      phone: 'invalid-phone',
+      email: 'marco@example.com',
+    },
+  ])('fails with nullable field having invalid value', (data) => {
+    try {
+      validate(data, {
+        name: ['required'],
+        age: ['required'],
+        phone: ['nullable', ['regex', '^\\+39\\d+$']], // nullable but invalid format
+        email: ['required', 'email'],
+      })
+      expect(true).toBe(false)
+    }
+    catch (error) {
+      expect(error).toBeInstanceOf(AppsyncError)
+      if (!(error instanceof AppsyncError)) {
+        throw new Error('This should not happen')
+      }
+      expect(error.message).toBe('phone must match the specified regular expression')
+    }
+  })
+
+  it.each([
+    {
+      name: 'Marco',
+      hobbies: [null, 'hiking'] as unknown[] as string[],
+    },
+  ])('removes the index from array values error\' messages', (data) => {
+    try {
+      validate<{ name: string, hobbies: string[] }>(data, {
+        'name': ['required'],
+        'hobbies': ['required', 'array', ['min', 1]],
+        'hobbies.0': ['required', 'string', ['max', 50]],
+        'hobbies.1': ['required', 'string', ['max', 50]],
+      })
+      expect(false).toBe(true)
+    }
+    catch (error) {
+      expect(error).toBeInstanceOf(AppsyncError)
+      if (!(error instanceof AppsyncError)) {
+        throw new Error('This should not happen')
+      }
+      expect(error.message).toBe('hobbies is not nullable')
+      expect(error.errors).toHaveLength(1)
     }
   })
 })
