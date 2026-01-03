@@ -1,20 +1,23 @@
 import type { Context } from '@aws-appsync/utils'
-import type { NestedKeyOf, Rule, ShortRule } from './types'
+import type { FullRule, NestedKeyOf, Rule } from './types'
 import { runtime, util } from '@aws-appsync/utils'
 import * as rules from './rules'
-import { cleanString, getNestedValue, isPrecognitiveRequest, precognitiveKeys, setNestedValue } from './utils'
+import { cleanString, getNestedValue, isArray, isPrecognitiveRequest, precognitiveKeys, setNestedValue } from './utils'
 
 export function validate<T extends object>(
   obj: T,
-  checks: Partial<Record<NestedKeyOf<T>, (ShortRule<keyof typeof rules['names']> | Rule)[]>>,
+  checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule)[]>>,
+  options?: {
+    trim?: boolean
+    allowEmptyString?: boolean
+  },
 ): T {
-  let hasErrors = false
-  const errorMessages: string[] = []
+  let error: { msg?: string, errorType?: string, data?: any, errorInfo?: any } = {}
 
   Object.keys(checks).forEach((path) => {
     let value = getNestedValue(obj, path as NestedKeyOf<T>)
     if (typeof value === 'string') {
-      value = cleanString(value)
+      value = cleanString(value, options)
       setNestedValue(obj, path as NestedKeyOf<T>, value)
     }
 
@@ -24,36 +27,44 @@ export function validate<T extends object>(
         return
       }
 
-      if (rule === 'nullable' && value === null) {
+      if (rule === 'nullable' && value === null)
         skip = true
-      }
-      if (rule === 'sometimes' && typeof value === 'undefined') {
-        skip = true
-      }
 
-      const result = (typeof rule === 'string') ? rules.parse(value, rule) : { ...rule }
+      if (rule === 'sometimes' && typeof value === 'undefined')
+        skip = true
+
+      const result = (typeof rule === 'string' || isArray(rule))
+        ? rules.parse(value, rule)
+        : { ...rule }
+
       if (result.check)
         return
-      hasErrors = true
+
+      if (error.msg)
+        util.appendError(error.msg, error.errorType, error.data, error.errorInfo)
+
       result.message = result.message.replace(':attribute', formatAttributeName(path))
-      errorMessages.push(result.message)
-      util.appendError(result.message, 'ValidationError', null, { path, value })
-      if (rule === 'required') {
-        skip = true
+      error = {
+        msg: result.message,
+        errorType: 'ValidationError',
+        data: null,
+        errorInfo: { path, value },
       }
+
+      skip = true
     })
   })
 
-  if (hasErrors) {
-    util.error(errorMessages[0], 'ValidationError')
+  if (!error.msg) {
+    return obj
   }
 
-  return obj
+  util.error(error.msg, error.errorType, error.data, error.errorInfo)
 }
 
 export function precognitiveValidation<T extends object>(
   ctx: Context<T>,
-  checks: Partial<Record<NestedKeyOf<T>, (ShortRule<keyof typeof rules['names']> | Rule)[]>>,
+  checks: Partial<Record<NestedKeyOf<T>, (| Rule)[]>>,
 ): T {
   if (!isPrecognitiveRequest(ctx)) {
     return validate(ctx.args, checks)

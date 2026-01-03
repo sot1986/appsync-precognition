@@ -8,7 +8,17 @@ describe.concurrent('test betweenRule validation', () => {
     'abcd',
     'abcde',
   ])('validates between length string', (value) => {
-    const result = rules.parse(value, 'between:2,5')
+    const result = rules.parse(value, ['between', 2, 5])
+    expect(result.check).toBe(true)
+  })
+
+  it.concurrent.each([
+    'aa',
+    'abc',
+    'abcd',
+    'abcde',
+  ])('validates between length string in full form', (value) => {
+    const result = rules.parse(value, ['between', 2, 5])
     expect(result.check).toBe(true)
   })
 
@@ -17,7 +27,7 @@ describe.concurrent('test betweenRule validation', () => {
     'abcdef',
     null,
   ])('invalidates between length string', (value) => {
-    const result = rules.parse(value, 'between:2,5')
+    const result = rules.parse(value, ['between', 2, 5])
     expect(result.check).toBe(false)
   })
 
@@ -27,7 +37,7 @@ describe.concurrent('test betweenRule validation', () => {
     [1, 2, 3] as unknown[],
     [1, 2, 3, 4, 5] as unknown[],
   ])('validates between length array', (...value) => {
-    const result = rules.parse(value, 'between:2,5')
+    const result = rules.parse(value, ['between', 2, 5])
     expect(result.check).toBe(true)
   })
 
@@ -36,7 +46,7 @@ describe.concurrent('test betweenRule validation', () => {
     [1, 2, 3, 4, 5, 6] as unknown[],
     [null],
   ])('invalidates between length array', (...value) => {
-    const result = rules.parse(value, 'between:2,5')
+    const result = rules.parse(value, ['between', 2, 5])
     expect(result.check).toBe(false)
   })
 
@@ -48,7 +58,7 @@ describe.concurrent('test betweenRule validation', () => {
     5,
     2.5,
   ])('validates between number', (value) => {
-    const result = rules.parse(value, 'between:2,5')
+    const result = rules.parse(value, ['between', 2, 5])
     expect(result.check).toBe(true)
   })
 
@@ -58,7 +68,7 @@ describe.concurrent('test betweenRule validation', () => {
     0,
     -1,
   ])('invalidates between number', (value) => {
-    const result = rules.parse(value, 'between:2,5')
+    const result = rules.parse(value, ['between', 2, 5])
     expect(result.check).toBe(false)
   })
 })

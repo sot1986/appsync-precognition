@@ -24,11 +24,11 @@ describe.concurrent('test validate function', () => {
     },
   ])('pass with valid objects', (data) => {
     const result = validate(data, {
-      'name': ['required', 'min:3'],
-      'age': ['required', 'min:18'],
+      'name': ['required', ['min', 3]],
+      'age': ['required', ['min', 18]],
       'address.address': ['required'],
-      'address.cap': ['required', 'between:2,10'],
-      'phone': ['sometimes', 'regex:^\+39\d+$'],
+      'address.cap': ['required', ['between', 2, 10]],
+      'phone': ['sometimes', ['regex', '^\+39\d+$']],
     })
     expect(result).toEqual(data)
   })
@@ -47,11 +47,11 @@ describe.concurrent('test validate function', () => {
   ])('fails with invalid objects, tracking each errors', (data) => {
     try {
       validate(data, {
-        'name': ['required', 'min:3'],
-        'age': ['required', 'min:18'],
+        'name': ['required', ['min', 3]],
+        'age': ['required', ['min', 18]],
         'address.address': ['required'],
-        'address.cap': ['required', 'between:2,10'],
-        'phone': ['required', 'regex:^\+39\d+$'],
+        'address.cap': ['required', ['between', 2, 10]],
+        'phone': ['required', ['regex', '^\+39\d+$']],
       })
       expect(true).toBe(false)
     }
@@ -61,7 +61,7 @@ describe.concurrent('test validate function', () => {
         throw new Error('This should not happen')
       }
       expect(error.message).toBe('phone is required')
-      expect(error.errors).toHaveLength(2)
+      expect(error.errors).toHaveLength(1)
       expect(error.errors[0].msg).toBe('phone is required')
       expect(error.errors[0].errorType).toBe('ValidationError')
       expect(error.errors[0].data).toBe(null)

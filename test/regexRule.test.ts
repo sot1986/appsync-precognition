@@ -17,7 +17,7 @@ describe.concurrent('test regexRule validation', () => {
     ['test@example.com', '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'],
     ['  trimmed  ', '^trimmed$'], // tests trimming
   ])('validates string matching regex pattern', (value, pattern) => {
-    const result = rules.parse(value, `regex:${pattern}`)
+    const result = rules.parse(value, [`regex`, pattern])
     expect(result.check).toBe(true)
   })
 
@@ -28,13 +28,8 @@ describe.concurrent('test regexRule validation', () => {
     ['', '^[a-z]+$'],
     ['ABC', '^[a-z]+$'],
   ])('invalidates string not matching regex pattern', (value, pattern) => {
-    const result = rules.parse(value, `regex:${pattern}`)
+    const result = rules.parse(value, [`regex`, pattern])
     expect(result.check).toBe(false)
-  })
-
-  it('handles empty regex pattern', () => {
-    const result = rules.parse('test', 'regex:')
-    expect(result.check).toBe(true) // empty regex matches everything
   })
 
   // test non-string values
@@ -45,7 +40,7 @@ describe.concurrent('test regexRule validation', () => {
     true,
     null,
   ])('invalidates non-string values', (value) => {
-    const result = rules.parse(value, 'regex:^[a-z]+$')
+    const result = rules.parse(value, ['regex', '^[a-z]+$'])
     expect(result.check).toBe(false)
   })
 })

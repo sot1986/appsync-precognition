@@ -1,29 +1,13 @@
-import type { Rule, ShortRule } from './types'
+import type { FullRule, Rule } from './types'
 import { util } from '@aws-appsync/utils'
 import { isArray } from './utils'
 
-export const names = {
-  required: 'required',
-  nullable: 'nullable',
-  sometimes: 'sometimes',
-  min: 'min',
-  max: 'max',
-  between: 'between',
-  email: 'email',
-  url: 'url',
-  uuid: 'uuid',
-  ulid: 'ulid',
-  regex: 'regex',
-  in: 'in',
-  notIn: 'notIn',
-  before: 'before',
-  after: 'after',
-} as const
+export function parse<T>(value: T, rule: FullRule): Rule<T> {
+  const [name, ...params] = typeof rule === 'string'
+    ? [rule, undefined]
+    : [rule[0], ...rule.slice(1)]
 
-export function parse<T>(value: T, rule: ShortRule<keyof typeof names>): Rule<T> {
-  const [ruleName, params] = rule.includes(':') ? rule.split(':', 2) : [rule, '']
-
-  switch (ruleName as keyof typeof names) {
+  switch (name) {
     case 'required':
       return requiredRule(value)
     case 'nullable':
@@ -31,11 +15,12 @@ export function parse<T>(value: T, rule: ShortRule<keyof typeof names>): Rule<T>
     case 'sometimes':
       return sometimesRule(value)
     case 'min':
-      return minRule(value, ...params.split(','))
+      return minRule(value, (params[0]! as number))
     case 'max':
-      return maxRule(value, ...params.split(','))
-    case 'between':
-      return betweenRule(value, ...params.split(','))
+      return maxRule(value, (params[0] as number))
+    case 'between': {
+      return betweenRule(value, (params[0] as number), params[1] as number)
+    }
     case 'email':
       return emailRule(value)
     case 'url':
@@ -45,18 +30,30 @@ export function parse<T>(value: T, rule: ShortRule<keyof typeof names>): Rule<T>
     case 'ulid':
       return ulidRule(value)
     case 'regex':
-      return regexRule(value, params)
+      return regexRule(value, params[0] as string)
     case 'in':
-      return inRule(value, ...params.split(','))
-    case 'notIn':
-      return notInRule(value, ...params.split(','))
+      return inRule(value, ...params)
+    case 'notIn': {
+      return notInRule(value, ...params)
+    }
+    case 'array':
+      return arrayRule(value)
+    case 'object':
+      return objectRule(value)
+    case 'boolean':
+      return booleanRule(value)
+    case 'number':
+      return numberRule(value)
+    case 'string':
+      return stringRule(value)
+    case 'date':
+      return dateRule(value)
     default:
-      return { check: false, message: `Unknown rule ${ruleName}`, value }
+      return { check: false, message: `Unknown rule ${name}`, value }
   }
 }
 
-function minRule<T>(value: T, ...params: string[]): Rule<T> {
-  const minValue = Number(params[0] ?? '0')
+function minRule<T>(value: T, minValue: number): Rule<T> {
   const result: Rule<T> = {
     check: false,
     message: `:attribute must be greater than or equal to ${minValue}`,
@@ -65,8 +62,8 @@ function minRule<T>(value: T, ...params: string[]): Rule<T> {
   if (typeof value === 'number') {
     result.check = value >= minValue
   }
-  if (typeof result.value === 'string') {
-    result.check = (result.value).length >= minValue
+  if (typeof value === 'string') {
+    result.check = value.length >= minValue
   }
   if (isArray(value)) {
     result.check = value.length >= minValue
@@ -75,8 +72,7 @@ function minRule<T>(value: T, ...params: string[]): Rule<T> {
   return result
 }
 
-function maxRule<T>(value: T, ...params: string[]): Rule<T> {
-  const maxValue = Number(params[0] ?? '0')
+function maxRule<T>(value: T, maxValue: number): Rule<T> {
   const result: Rule<T> = {
     check: false,
     message: `:attribute must be less than or equal to ${maxValue}`,
@@ -86,8 +82,8 @@ function maxRule<T>(value: T, ...params: string[]): Rule<T> {
   if (typeof value === 'number') {
     result.check = value <= maxValue
   }
-  if (typeof result.value === 'string') {
-    result.check = result.value.length <= maxValue
+  if (typeof value === 'string') {
+    result.check = value.length <= maxValue
     result.message = `String must contain at most ${maxValue} characters`
   }
   if (isArray(value)) {
@@ -97,9 +93,7 @@ function maxRule<T>(value: T, ...params: string[]): Rule<T> {
   return result
 }
 
-function betweenRule<T>(value: T, ...params: string[]): Rule<T> {
-  const minValue = Number(params[0] ?? '0')
-  const maxValue = Number(params[1] ?? '0')
+function betweenRule<T>(value: T, minValue: number, maxValue: number): Rule<T> {
   const result: Rule<T> = {
     check: false,
     message: `:attribute must be between ${minValue} and ${maxValue}`,
@@ -108,8 +102,8 @@ function betweenRule<T>(value: T, ...params: string[]): Rule<T> {
   if (typeof value === 'number') {
     result.check = value >= minValue && value <= maxValue
   }
-  if (typeof result.value === 'string') {
-    result.check = result.value.length >= minValue && (result.value).length <= maxValue
+  if (typeof value === 'string') {
+    result.check = value.length >= minValue && value.length <= maxValue
     result.message = `String must contain between ${minValue} and ${maxValue} characters`
   }
   if (isArray(value)) {
@@ -153,7 +147,7 @@ function uuidRule<T>(value: T): Rule<T> {
     message: ':attribute must be a valid UUID',
     value,
   }
-  if (typeof result.value === 'string') {
+  if (typeof value === 'string') {
     result.check = util.matches(
       '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
       value as string,
@@ -168,7 +162,7 @@ function ulidRule<T>(value: T): Rule<T> {
     message: ':attribute must be a valid ULID',
     value,
   }
-  if (typeof result.value === 'string') {
+  if (typeof value === 'string') {
     // ULID format: 26 characters, base32 encoded (0-9, A-Z excluding I, L, O, U)
     result.check = util.matches(
       '^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$',
@@ -178,79 +172,64 @@ function ulidRule<T>(value: T): Rule<T> {
   return result
 }
 
-function regexRule<T>(value: T, ...params: string[]): Rule<T> {
-  const regex = params[0] ?? ''
+function regexRule<T>(value: T, pattern: string): Rule<T> {
   const result: Rule<T> = {
     check: false,
     message: ':attribute must match the specified regular expression',
     value,
   }
-  if (typeof result.value === 'string') {
-    result.value = result.value.trim() as T
-    result.check = util.matches(regex, result.value as string)
+  if (typeof value === 'string') {
+    result.value = value.trim() as T
+    result.check = util.matches(pattern, result.value as string)
   }
   return result
 }
 
-function inRule<T>(value: T, ...params: string[]): Rule<T> {
-  const result: Rule<T> = {
-    check: false,
+function inRule<T>(value: T, ...params: unknown[]): Rule<T> {
+  return {
+    check: params.includes(value),
     message: ':attribute must be one of the specified values',
     value,
   }
-  if (typeof result.value === 'string') {
-    result.check = params.includes(result.value)
-  }
-  if (typeof value === 'number') {
-    result.check = params.map(Number).includes(value)
-  }
-  return result
 }
 
-function notInRule<T>(value: T, ...params: string[]): Rule<T> {
-  const result: Rule<T> = {
-    check: false,
+function notInRule<T>(value: T, ...params: unknown[]): Rule<T> {
+  return {
+    check: !params.includes(value),
     message: ':attribute must not be one of the specified values',
     value,
   }
-  if (typeof result.value === 'string') {
-    result.check = !params.includes(result.value)
-  }
-  if (typeof value === 'number') {
-    result.check = !params.map(Number).includes(value)
-  }
-  return result
 }
 
-export function requiredRule<T>(value: T, ..._params: string[]): Rule<T> {
+export function requiredRule<T>(value: T): Rule<T> {
   const result: Rule<T> = {
     check: true,
     message: ':attribute is required',
     value,
   }
-  if (typeof result.value === 'string') {
-    result.check = result.value.length > 0
+  if (typeof value === 'string') {
+    result.check = value.length > 0
   }
-  if (isArray(result.value)) {
-    result.check = result.value.length > 0
+  if (isArray(value)) {
+    result.check = value.length > 0
   }
-  if (typeof result.value === 'number') {
+  if (typeof value === 'number') {
     result.check = true
   }
   if (typeof value === 'boolean') {
     result.check = true
   }
-  if (typeof result.value === 'object' && !result.value) {
+  if (typeof value === 'object' && !result.value) {
     result.message = ':attribute is not nullable'
     result.check = false
   }
-  if (typeof result.value === 'undefined') {
+  if (typeof value === 'undefined') {
     result.check = false
   }
   return result
 }
 
-function nullableRule<T>(value: T, ..._params: string[]): Rule<T> {
+function nullableRule<T>(value: T): Rule<T> {
   const result: Rule<T> = {
     check: true,
     message: '',
@@ -259,18 +238,96 @@ function nullableRule<T>(value: T, ..._params: string[]): Rule<T> {
   return result
 }
 
-function sometimesRule<T>(value: T, ..._params: string[]): Rule<T> {
+function sometimesRule<T>(value: T): Rule<T> {
   const result: Rule<T> = {
     check: true,
     message: '',
     value,
   }
-  if (typeof result.value === 'undefined') {
+  if (typeof value === 'undefined') {
     return result
   }
-  if (typeof result.value === 'object' && !result.value) {
+  if (typeof value === 'object' && !result.value) {
     result.message = ':attribute is not nullable'
     result.check = false
   }
-  return requiredRule(value, ..._params)
+  return requiredRule(value)
+}
+
+function arrayRule<T>(value: T): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: ':attribute must be an array',
+    value,
+  }
+  if (isArray(value)) {
+    result.check = true
+  }
+  return result
+}
+
+function objectRule<T>(value: T): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: ':attribute must be an object',
+    value,
+  }
+  if (typeof value === 'object' && !isArray(result.value)) {
+    result.check = true
+  }
+  return result
+}
+
+function booleanRule<T>(value: T): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: ':attribute must be a boolean',
+    value,
+  }
+  if (typeof value === 'boolean') {
+    result.check = true
+  }
+  return result
+}
+
+function numberRule<T>(value: T): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: ':attribute must be a number',
+    value,
+  }
+  if (typeof value === 'number') {
+    result.check = true
+  }
+  return result
+}
+
+function stringRule<T>(value: T): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: ':attribute must be a string',
+    value,
+  }
+  if (typeof value === 'string') {
+    result.check = true
+  }
+  return result
+}
+
+function dateRule<T>(value: T): Rule<T> {
+  const result: Rule<T> = {
+    check: false,
+    message: ':attribute must be a date',
+    value,
+  }
+  if (typeof value === 'string') {
+    result.check = util.matches(
+      '^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3,6}Z$',
+      result.value as string,
+    )
+  }
+  if (typeof value === 'number') {
+    result.check = true
+  }
+  return result
 }

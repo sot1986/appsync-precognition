@@ -6,8 +6,8 @@ describe.concurrent('test minRule validation', () => {
     'aa',
     'a'.repeat(10),
     'a'.repeat(500),
-  ])('validates min lenght string', (value) => {
-    const result = rules.parse(value, 'min:2')
+  ])('validates min length string', (value) => {
+    const result = rules.parse(value, ['min', 2])
     expect(result.check).toBe(true)
   })
 
@@ -15,8 +15,8 @@ describe.concurrent('test minRule validation', () => {
   it.concurrent.each([
     'a',
     null,
-  ])('invalidates min lenght string', (value) => {
-    const result = rules.parse(value, 'min:2')
+  ])('invalidates min length string', (value) => {
+    const result = rules.parse(value, ['min', 2])
     expect(result.check).toBe(false)
   })
 
@@ -24,16 +24,16 @@ describe.concurrent('test minRule validation', () => {
   it.concurrent.each([
     [1, 2, 3] as unknown[],
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as unknown[],
-  ])('validates min lenght array', (...value) => {
-    const result = rules.parse(value, 'min:2')
+  ])('validates min length array', (...value) => {
+    const result = rules.parse(value, ['min', 2])
     expect(result.check).toBe(true)
   })
 
   it.concurrent.each([
     [1] as unknown[],
     [null],
-  ])('invalidates min lenght array', (...value) => {
-    const result = rules.parse(value, 'min:2')
+  ])('invalidates min length array', (...value) => {
+    const result = rules.parse(value, ['min', 2])
     expect(result.check).toBe(false)
   })
 
@@ -42,7 +42,7 @@ describe.concurrent('test minRule validation', () => {
     2,
     2.0,
   ])('validates min number', (value) => {
-    const result = rules.parse(value, 'min:2')
+    const result = rules.parse(value, ['min', 2])
     expect(result.check).toBe(true)
   })
 
@@ -50,8 +50,8 @@ describe.concurrent('test minRule validation', () => {
     1,
     0,
     -5,
-  ])('invalidates min lenght number', (value) => {
-    const result = rules.parse(value, 'min:2')
+  ])('invalidates min length number', (value) => {
+    const result = rules.parse(value, ['min', 2])
     expect(result.check).toBe(false)
   })
 })

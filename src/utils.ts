@@ -50,9 +50,20 @@ export function precognitiveKeys(ctx: Context): string[] | null {
   return keys ? keys.split(',').map(key => key.trim()) : null
 }
 
-export function cleanString(value: string): string | null {
+export function cleanString(value: string, options?: {
+  trim?: boolean
+  allowEmptyString?: boolean
+}): string | null {
+  if (options?.trim === false)
+    return value
+
   let parsed: string | null = value.trim()
+
+  if (options?.allowEmptyString)
+    return parsed
+
   if (parsed === '')
     parsed = null
+
   return parsed
 }

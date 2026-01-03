@@ -17,7 +17,7 @@ describe.concurrent('test inRule validation', () => {
     ['red', 'red,green,blue'],
     ['active', 'active,inactive,pending'],
   ])('validates string in allowed values', (value, allowedValues) => {
-    const result = rules.parse(value, `in:${allowedValues}`)
+    const result = rules.parse(value, ['in', ...allowedValues.split(',')])
     expect(result.check).toBe(true)
   })
 
@@ -27,26 +27,26 @@ describe.concurrent('test inRule validation', () => {
     ['deleted', 'active,inactive,pending'],
     ['', 'apple,banana,orange'],
   ])('invalidates string not in allowed values', (value, allowedValues) => {
-    const result = rules.parse(value, `in:${allowedValues}`)
+    const result = rules.parse(value, ['in', ...allowedValues])
     expect(result.check).toBe(false)
   })
 
   // test number values
   it.concurrent.each([
-    [1, '1,2,3'],
-    [2, '1,2,3'],
-    [10, '10,20,30'],
-  ])('validates number in allowed values', (value, allowedValues) => {
-    const result = rules.parse(value, `in:${allowedValues}`)
+    [1, 1, 2, 3],
+    [2, 1, 2, 3],
+    [10, 10, 20, 30],
+  ])('validates number in allowed values', (value, ...allowedValues) => {
+    const result = rules.parse(value, ['in', ...allowedValues])
     expect(result.check).toBe(true)
   })
 
   it.concurrent.each([
-    [4, '1,2,3'],
-    [0, '1,2,3'],
-    [15, '10,20,30'],
-  ])('invalidates number not in allowed values', (value, allowedValues) => {
-    const result = rules.parse(value, `in:${allowedValues}`)
+    [4, 1, 2, 3],
+    [0, 1, 2, 3],
+    [15, 10, 20, 30],
+  ])('invalidates number not in allowed values', (value, ...allowedValues) => {
+    const result = rules.parse(value, ['in', ...allowedValues])
     expect(result.check).toBe(false)
   })
 
@@ -57,7 +57,7 @@ describe.concurrent('test inRule validation', () => {
     [true, 'apple,banana,orange'],
     [null, 'apple,banana,orange'],
   ])('invalidates non-string/non-number values', (value, allowedValues) => {
-    const result = rules.parse(value, `in:${allowedValues}`)
+    const result = rules.parse(value, ['in', ...allowedValues])
     expect(result.check).toBe(false)
   })
 })

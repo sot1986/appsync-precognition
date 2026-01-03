@@ -6,7 +6,28 @@ export interface Rule<T = unknown> {
   value: T
 }
 
-export type ShortRule<T extends string> = T | `${T}:${string}`
+export type FullRule
+  = 'required'
+    | 'nullable'
+    | 'sometimes'
+    | 'number'
+    | 'boolean'
+    | 'string'
+    | 'array'
+    | 'object'
+    | 'date'
+    | ['min', number]
+    | ['max', number]
+    | ['between', number, number]
+    | 'email'
+    | 'url'
+    | 'uuid'
+    | 'ulid'
+    | ['regex', string]
+    | ['in', ...(string | number | boolean | null)[]]
+    | ['notIn', ...(string | number | boolean | null)[]]
+    | ['after', string]
+    | ['before', string]
 
 type ArrayKeys<T extends unknown[]>
   = T extends [unknown, ...unknown[]]

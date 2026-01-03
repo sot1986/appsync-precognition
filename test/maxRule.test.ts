@@ -6,8 +6,8 @@ describe('test maxRule validation', () => {
     '',
     'a',
     'a'.repeat(10),
-  ])('validates max lenght string', (value) => {
-    const result = rules.parse(value, 'max:10')
+  ])('validates max length string', (value) => {
+    const result = rules.parse(value, ['max', 10])
     expect(result.check).toBe(true)
   })
 
@@ -15,8 +15,8 @@ describe('test maxRule validation', () => {
     [] as unknown[],
     ['a', 'b'],
     ['a', null, 3, 4],
-  ])('validates max array lenght', (...array) => {
-    const result = rules.parse(array, 'max:4')
+  ])('validates max array length', (...array) => {
+    const result = rules.parse(array, ['max', 4])
     expect(result.check).toBe(true)
   })
 
@@ -25,7 +25,7 @@ describe('test maxRule validation', () => {
     5,
     0,
   ])('validates max number', (value) => {
-    const result = rules.parse(value, 'max:5')
+    const result = rules.parse(value, ['max', 5])
     expect(result.check).toBe(true)
   })
 
@@ -34,23 +34,23 @@ describe('test maxRule validation', () => {
     100,
     9.0000001,
   ])('invalidates max number', (value) => {
-    const result = rules.parse(value, 'max:9')
+    const result = rules.parse(value, ['max', 9])
     expect(result.check).toBe(false)
   })
 
   it.concurrent.each([
     'a'.repeat(11),
     'a'.repeat(100),
-  ])('invalidates max lenght string', (value) => {
-    const result = rules.parse(value, 'max:10')
+  ])('invalidates max length string', (value) => {
+    const result = rules.parse(value, ['max', 10])
     expect(result.check).toBe(false)
   })
 
   it.concurrent.each([
     ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
     ['a', 'b', null, 'd', 'e', 'f', 'g'],
-  ])('invalidates max array lenght', (...array) => {
-    const result = rules.parse(array, 'max:4')
+  ])('invalidates max array length', (...array) => {
+    const result = rules.parse(array, ['max', 4])
     expect(result.check).toBe(false)
   })
 })

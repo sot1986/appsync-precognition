@@ -16,7 +16,7 @@ describe.concurrent('test notInRule validation', () => {
     ['deleted', 'active,inactive,pending'],
     ['', 'apple,banana,orange'],
   ])('validates string not in forbidden values', (value, forbiddenValues) => {
-    const result = rules.parse(value, `notIn:${forbiddenValues}`)
+    const result = rules.parse(value, ['notIn', ...forbiddenValues.split(',')])
     expect(result.check).toBe(true)
   })
 
@@ -26,26 +26,26 @@ describe.concurrent('test notInRule validation', () => {
     ['red', 'red,green,blue'],
     ['active', 'active,inactive,pending'],
   ])('invalidates string in forbidden values', (value, forbiddenValues) => {
-    const result = rules.parse(value, `notIn:${forbiddenValues}`)
+    const result = rules.parse(value, ['notIn', ...forbiddenValues.split(',')])
     expect(result.check).toBe(false)
   })
 
   // test number values
   it.concurrent.each([
-    [4, '1,2,3'],
-    [0, '1,2,3'],
-    [15, '10,20,30'],
-  ])('validates number not in forbidden values', (value, forbiddenValues) => {
-    const result = rules.parse(value, `notIn:${forbiddenValues}`)
+    [11, 1, 2, 3],
+    [25, 1, 2, 3],
+    [100, 10, 20, 30],
+  ])('validates number not in forbidden values', (value, ...forbiddenValues) => {
+    const result = rules.parse(value, ['notIn', ...forbiddenValues])
     expect(result.check).toBe(true)
   })
 
   it.concurrent.each([
-    [1, '1,2,3'],
-    [2, '1,2,3'],
-    [10, '10,20,30'],
-  ])('invalidates number in forbidden values', (value, forbiddenValues) => {
-    const result = rules.parse(value, `notIn:${forbiddenValues}`)
+    [1, 1, 2, 3],
+    [2, 1, 2, 3],
+    [10, 10, 20, 30],
+  ])('invalidates number in forbidden values', (value, ...forbiddenValues) => {
+    const result = rules.parse(value, ['notIn', ...forbiddenValues])
     expect(result.check).toBe(false)
   })
 
@@ -55,8 +55,8 @@ describe.concurrent('test notInRule validation', () => {
     [{}, 'apple,banana,orange'],
     [true, 'apple,banana,orange'],
     [null, 'apple,banana,orange'],
-  ])('invalidates non-string/non-number values', (value, forbiddenValues) => {
-    const result = rules.parse(value, `notIn:${forbiddenValues}`)
-    expect(result.check).toBe(false)
+  ])('accept non-string/non-number values', (value, forbiddenValues) => {
+    const result = rules.parse(value, ['notIn', ...forbiddenValues.split(',')])
+    expect(result.check).toBe(true)
   })
 })
