@@ -1,4 +1,3 @@
-import type { Context } from '@aws-appsync/utils'
 import type { NestedKeyOf } from './types'
 import { util } from '@aws-appsync/utils'
 
@@ -32,7 +31,7 @@ export function setNestedValue<T extends { [key in keyof T & string]: T[key] }>(
   }
 }
 
-export function getHeader(name: string, ctx: Context): string | null {
+export function getHeader(name: string, ctx: { request: { headers: any } }): string | null {
   return Object.entries(ctx.request.headers)
     .reduce((prev, [key, value]) => typeof prev === 'string'
       ? prev
@@ -41,11 +40,11 @@ export function getHeader(name: string, ctx: Context): string | null {
           : null), null as string | null)
 }
 
-export function isPrecognitiveRequest(ctx: Context): boolean {
+export function isPrecognitiveRequest(ctx: { request: { headers: any } }): boolean {
   return getHeader('precognition', ctx) === 'true'
 }
 
-export function precognitiveKeys(ctx: Context): string[] | null {
+export function precognitiveKeys(ctx: { request: { headers: any } }): string[] | null {
   const keys = getHeader('Precognition-Validate-Only', ctx)
   return keys ? keys.split(',').map(key => key.trim()) : null
 }

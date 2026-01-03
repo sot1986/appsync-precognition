@@ -1,4 +1,3 @@
-import type { Context } from '@aws-appsync/utils'
 import type { FullRule, NestedKeyOf, Rule } from './types'
 import { runtime, util } from '@aws-appsync/utils'
 import * as rules from './rules'
@@ -65,7 +64,7 @@ export function validate<T extends { [key in keyof T & string]: T[key] }>(
 export function precognitiveValidation<
   T extends { [key in keyof T & string]: T[key] },
 >(
-  ctx: Context<Partial<T>>,
+  ctx: { request: { headers: any }, args: Partial<T> },
   checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule<T>)[]>>,
   options?: {
     trim?: boolean
