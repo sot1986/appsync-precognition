@@ -1,3 +1,4 @@
+import type { Context } from '@aws-appsync/utils'
 import { describe, expect, it, vi } from 'vitest'
 import { precognitiveValidation } from '../src/index'
 import { AppsyncError, EarlyReturnError } from './mocks'
@@ -69,7 +70,7 @@ describe.concurrent('test precognitiveValidation function', () => {
         },
       },
       args: { name: '', age: 25 },
-    } as any
+    } as Context<{ name: string, age: number, email?: string | null }>
 
     expect(() => {
       precognitiveValidation(ctx, {
