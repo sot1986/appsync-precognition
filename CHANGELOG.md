@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/sot1986/appsync-precognition/compare/v0.1.2...v0.2.0) (2026-01-04)
+
+
+### Features
+
+* update api to reduce library size ([b279883](https://github.com/sot1986/appsync-precognition/commit/b279883e88e3ac0ad0242f68b08e12c60f3212d7))
+
 ## [0.1.2](https://github.com/sot1986/appsync-precognition/compare/v0.1.1...v0.1.2) (2026-01-03)
 
 
