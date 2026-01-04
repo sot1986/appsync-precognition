@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { email } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -17,7 +18,7 @@ describe.concurrent('test emailRule validation', () => {
     'user123@test-domain.com',
     'a@b.co',
   ])('validates valid email', (value) => {
-    const result = rules.parse(value, 'email')
+    const result = rules.parse(value, ['regex', email])
     expect(result.check).toBe(true)
   })
 
@@ -32,7 +33,7 @@ describe.concurrent('test emailRule validation', () => {
     '',
     null,
   ])('invalidates invalid email', (value) => {
-    const result = rules.parse(value, 'email')
+    const result = rules.parse(value, ['regex', email])
     expect(result.check).toBe(false)
   })
 
@@ -43,7 +44,7 @@ describe.concurrent('test emailRule validation', () => {
     {},
     true,
   ])('invalidates non-string values', (value) => {
-    const result = rules.parse(value, 'email')
+    const result = rules.parse(value, ['regex', email])
     expect(result.check).toBe(false)
   })
 })

@@ -1,7 +1,7 @@
 import type { FullRule, NestedKeyOf, Rule } from './types'
 import { runtime, util } from '@aws-appsync/utils'
 import * as rules from './rules'
-import { cleanString, getNestedValue, isArray, isPrecognitiveRequest, precognitiveKeys, setNestedValue } from './utils'
+import { cleanString, getHeader, getNestedValue, isArray, setNestedValue } from './utils'
 
 export function validate<T extends { [key in keyof T & string]: T[key] }>(
   obj: Partial<T>,
@@ -22,19 +22,14 @@ export function validate<T extends { [key in keyof T & string]: T[key] }>(
 
     let skip = false
     checks[path as NestedKeyOf<T>]?.forEach((rule) => {
-      if (skip) {
+      if (skip)
         return
-      }
-
-      if (rule === 'nullable' && value === null)
-        skip = true
-
-      if (rule === 'sometimes' && typeof value === 'undefined')
-        skip = true
 
       const result = (typeof rule === 'string' || isArray(rule))
         ? rules.parse(value, rule)
         : { ...rule }
+
+      skip = result.skipNext ?? false
 
       if (result.check)
         return
@@ -72,10 +67,10 @@ export function precognitiveValidation<
     skipTo?: 'END' | 'NEXT'
   },
 ): T {
-  if (!isPrecognitiveRequest(ctx)) {
+  if (getHeader('precognition', ctx) !== 'true') {
     return validate<T>(ctx.args, checks, options)
   }
-  const validationKeys = precognitiveKeys(ctx)
+  const validationKeys = getHeader('Precognition-Validate-Only', ctx)?.split(',').map(key => key.trim())
   util.http.addResponseHeader('Precognition', 'true')
 
   if (!validationKeys) {

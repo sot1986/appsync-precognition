@@ -1,25 +1,16 @@
-import { Context } from "@aws-appsync/utils";
+import { n as NestedKeyOf, r as Rule, t as FullRule } from "./types-1ORDfyL5.js";
 
-//#region src/types.d.ts
-interface Rule<T = unknown> {
-  check: boolean;
-  message: string;
-  value: T;
-}
-type FullRule = "required" | "nullable" | "sometimes" | "number" | "boolean" | "string" | "array" | "object" | "date" | ["min", number] | ["max", number] | ["between", number, number] | "email" | "url" | "uuid" | "ulid" | ["regex", string] | ["in", ...(string | number | boolean | null)[]] | ["notIn", ...(string | number | boolean | null)[]] | ["after", string] | ["before", string] | ["afterOrEqual", string] | ["beforeOrEqual", string];
-type ArrayKeys<T extends unknown[]> = T extends [unknown, ...unknown[]] ? T extends Record<infer Index, unknown> ? Index extends `${number}` ? Index : never : never : `${number}`;
-type ObjectKeys<T extends object> = T extends unknown[] ? ArrayKeys<T> : keyof T & string;
-interface HasConstructor {
-  new (...args: unknown[]): unknown;
-}
-type NestedKeyOf<T> = T extends Record<infer Key, unknown> ? T extends HasConstructor ? never : T extends CallableFunction ? never : Key extends string | number ? (ObjectKeys<T> | (T[Key] extends object ? `${ObjectKeys<Pick<T, Key>>}.${NestedKeyOf<T[Key]>}` : T extends unknown[] ? T extends [unknown, ...unknown[]] ? never : T[number] extends object ? `${number}.${NestedKeyOf<T[number]>}` : never : never)) : never : never;
-//#endregion
 //#region src/index.d.ts
-declare function validate<T extends object>(obj: T, checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule)[]>>, options?: {
+declare function validate<T extends { [key in keyof T & string]: T[key] }>(obj: Partial<T>, checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule<T>)[]>>, options?: {
   trim?: boolean;
   allowEmptyString?: boolean;
 }): T;
-declare function precognitiveValidation<T extends object>(ctx: Context<T>, checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule)[]>>, options?: {
+declare function precognitiveValidation<T extends { [key in keyof T & string]: T[key] }>(ctx: {
+  request: {
+    headers: any;
+  };
+  args: Partial<T>;
+}, checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule<T>)[]>>, options?: {
   trim?: boolean;
   allowEmptyString?: boolean;
   skipTo?: "END" | "NEXT";
@@ -27,4 +18,3 @@ declare function precognitiveValidation<T extends object>(ctx: Context<T>, check
 declare function formatAttributeName(path: string): string;
 //#endregion
 export { formatAttributeName, precognitiveValidation, validate };
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguZC50cyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIuLi9zcmMvdHlwZXMudHMiLCIuLi9zcmMvaW5kZXgudHMiXSwic291cmNlc0NvbnRlbnQiOltdLCJtYXBwaW5ncyI6Ijs7O1VBRWlCOztFQUFqQixPQUFpQixFQUFBLE1BQUE7RUFNakIsS0FBWSxFQUhILENBR0c7QUF1Qkw7QUFHSCxLQTFCUSxRQUFBLEdBMEJSLFVBQUEsR0FBQSxVQUFBLEdBQUEsV0FBQSxHQUFBLFFBQUEsR0FBQSxTQUFBLEdBQUEsUUFBQSxHQUFBLE9BQUEsR0FBQSxRQUFBLEdBQUEsTUFBQSxHQUFBLENBQUEsS0FBQSxFQUFBLE1BQUEsQ0FBQSxHQUFBLENBQUEsS0FBQSxFQUFBLE1BQUEsQ0FBQSxHQUFBLENBQUEsU0FBQSxFQUFBLE1BQUEsRUFBQSxNQUFBLENBQUEsR0FBQSxPQUFBLEdBQUEsS0FBQSxHQUFBLE1BQUEsR0FBQSxNQUFBLEdBQUEsQ0FBQSxPQUFBLEVBQUEsTUFBQSxDQUFBLEdBQUEsQ0FBQSxJQUFBLEVBQUEsR0FBQSxDQUFBLE1BQUEsR0FBQSxNQUFBLEdBQUEsT0FBQSxHQUFBLElBQUEsQ0FBQSxFQUFBLENBQUEsR0FBQSxDQUFBLE9BQUEsRUFBQSxHQUFBLENBQUEsTUFBQSxHQUFBLE1BQUEsR0FBQSxPQUFBLEdBQUEsSUFBQSxDQUFBLEVBQUEsQ0FBQSxHQUFBLENBQUEsT0FBQSxFQUFBLE1BQUEsQ0FBQSxHQUFBLENBQUEsUUFBQSxFQUFBLE1BQUEsQ0FBQSxHQUFBLENBQUEsY0FBQSxFQUFBLE1BQUEsQ0FBQSxHQUFBLENBQUEsZUFBQSxFQUFBLE1BQUEsQ0FBQTtLQURDLFNBRUMsQ0FBQSxVQUFBLE9BQUEsRUFBQSxDQUFBLEdBREYsQ0FDRSxTQUFBLENBQUEsT0FBQSxFQUFBLEdBQUEsT0FBQSxFQUFBLENBQUEsR0FBQSxDQUFBLFNBQVUsTUFBVixDQUFBLEtBQUEsTUFBQSxFQUFBLE9BQUEsQ0FBQSxHQUFBLEtBQUEsU0FBQSxHQUFBLE1BQUEsRUFBQSxHQUFBLEtBQUEsR0FBQSxLQUFBLEdBQUEsS0FBQSxHQUFBLEdBQUEsTUFBQSxFQUFBO0tBT0QsVUFQVyxDQUFBLFVBQUEsTUFBQSxDQUFBLEdBUVosQ0FSWSxTQUFBLE9BQUEsRUFBQSxHQVNWLFNBVFUsQ0FTQSxDQVRBLENBQUEsR0FBQSxNQVVKLENBVkksR0FBQSxNQUFBO1VBWU4sY0FBQSxDQVpNO0VBQUEsS0FPWCxHQUFBLElBQUEsRUFBQSxPQUFBLEVBQUEsQ0FBQSxFQUFBLE9BQUE7O0FBRVcsS0FPSixXQVBJLENBQUEsQ0FBQSxDQUFBLEdBT2EsQ0FQYixTQU91QixNQVB2QixDQUFBLEtBQUEsSUFBQSxFQUFBLE9BQUEsQ0FBQSxHQVFaLENBUlksU0FRRixjQVJFLEdBQUEsS0FBQSxHQVVWLENBVlUsU0FVQSxnQkFWQSxHQUFBLEtBQUEsR0FBQSxHQUFBLFNBQUEsTUFBQSxHQUFBLE1BQUEsR0FBQSxDQWFMLFVBYkssQ0FhTSxDQWJOLENBQUEsR0FBQSxDQWFZLENBYlosQ0FhYyxHQWJkLENBQUEsU0FBQSxNQUFBLEdBQUEsR0FjQyxVQWRELENBY1ksSUFkWixDQWNpQixDQWRqQixFQWNvQixHQWRwQixDQUFBLENBQUEsSUFjNkIsV0FkN0IsQ0FjeUMsQ0FkekMsQ0FjMkMsR0FkM0MsQ0FBQSxDQUFBLEVBQUEsR0FlRixDQWZFLFNBQUEsT0FBQSxFQUFBLEdBZ0JBLENBaEJBLFNBQUEsQ0FBQSxPQUFBLEVBQUEsR0FBQSxPQUFBLEVBQUEsQ0FBQSxHQUFBLEtBQUEsR0FrQkUsQ0FsQkYsQ0FBQSxNQUFBLENBQUEsU0FBQSxNQUFBLEdBQUEsR0FBQSxNQUFBLElBbUJpQixXQW5CakIsQ0FtQjZCLENBbkI3QixDQUFBLE1BQUEsQ0FBQSxDQUFBLEVBQUEsR0FBQSxLQUFBLEdBQUEsS0FBQSxDQUFBLENBQUEsR0FBQSxLQUFBLEdBQUEsS0FBQTs7O2lCQ3RDQSxnQ0FDVCxXQUNHLFFBQVEsT0FBTyxZQUFZLEtBQUssV0FBVyxrQkR1QjlDO0VBN0JQLElBQWlCLENBQUEsRUFBQSxPQUFBO0VBTWpCLGdCQUFZLENBQUEsRUFBQSxPQUFBO0FBdUJMLENBQUEsQ0FBQSxFQ2xCSixDRG9CRTtBQUNELGlCQzhCWSxzQkQ5QlosQ0FBQSxVQUFBLE1BQUEsQ0FBQSxDQUFBLEdBQUEsRUMrQkcsT0QvQkgsQ0MrQlcsQ0QvQlgsQ0FBQSxFQUFBLE1BQUEsRUNnQ00sT0RoQ04sQ0NnQ2MsTURoQ2QsQ0NnQ3FCLFdEaENyQixDQ2dDaUMsQ0RoQ2pDLENBQUEsRUFBQSxDQ2dDc0MsUURoQ3RDLEdDZ0NpRCxJRGhDakQsQ0FBQSxFQUFBLENBQUEsQ0FBQSxFQUFBLE9BQ1ksQ0FEWixFQUFBO0VBQ0UsSUFBQSxDQUFBLEVBQUEsT0FBQTtFQUFVLGdCQUFBLENBQUEsRUFBQSxPQUFBO0VBQUEsTUFBQSxDQUFBLEVBQUEsS0FBQSxHQUFBLE1BQUE7QUFBQSxDQUFBLENBQUEsRUNxQ2IsQ0Q5QkU7QUFDRCxpQkNxRFksbUJBQUEsQ0RyRFosSUFBQSxFQUFBLE1BQUEsQ0FBQSxFQUFBLE1BQUEifQ==

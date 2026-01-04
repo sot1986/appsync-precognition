@@ -15,7 +15,6 @@ describe.concurrent('test regexRule validation', () => {
     ['hello', '^[a-z]+$'],
     ['123', '^[0-9]+$'],
     ['test@example.com', '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'],
-    ['  trimmed  ', '^trimmed$'], // tests trimming
   ])('validates string matching regex pattern', (value, pattern) => {
     const result = rules.parse(value, [`regex`, pattern])
     expect(result.check).toBe(true)

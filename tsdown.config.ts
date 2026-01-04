@@ -1,11 +1,14 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: 'src/index.ts',
+  entry: {
+    index: './src/index.ts',
+    utils: './src/utils.ts',
+  },
   dts: {
     sourcemap: true,
   },
-  sourcemap: 'inline',
+  sourcemap: 'hidden',
   skipNodeModulesBundle: true,
   outExtensions: () => ({
     dts: '.d.ts',
@@ -13,4 +16,5 @@ export default defineConfig({
   }),
   clean: true,
   format: 'esm',
+  minify: true,
 })

@@ -1,15 +1,8 @@
 import type { NestedKeyOf } from './types'
 import { util } from '@aws-appsync/utils'
 
-export function isString(value: unknown): value is string {
-  return typeof value === 'string'
-}
-
 export function isArray(value: unknown): value is unknown[] {
-  if (typeof value === 'object' && !!value && Object.hasOwn(value, 'length')) {
-    return typeof (value as unknown[]).length === 'number'
-  }
-  return false
+  return (typeof value === 'object' && !!value && Object.hasOwn(value, 'length')) && typeof (value as unknown[]).length === 'number'
 }
 
 export function getNestedValue<T extends { [key in keyof T & string]: T[key] }>(obj: Partial<T>, path: NestedKeyOf<T>): any {
@@ -40,29 +33,25 @@ export function getHeader(name: string, ctx: { request: { headers: any } }): str
           : null), null as string | null)
 }
 
-export function isPrecognitiveRequest(ctx: { request: { headers: any } }): boolean {
-  return getHeader('precognition', ctx) === 'true'
-}
-
-export function precognitiveKeys(ctx: { request: { headers: any } }): string[] | null {
-  const keys = getHeader('Precognition-Validate-Only', ctx)
-  return keys ? keys.split(',').map(key => key.trim()) : null
-}
-
 export function cleanString(value: string, options?: {
   trim?: boolean
   allowEmptyString?: boolean
 }): string | null {
   if (options?.trim === false)
     return value
-
-  let parsed: string | null = value.trim()
-
+  const parsed: string | null = value.trim()
   if (options?.allowEmptyString)
     return parsed
-
-  if (parsed === '')
-    parsed = null
-
-  return parsed
+  return parsed === '' ? null : parsed
 }
+
+export const uuid = '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+export const ulid = '^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$'
+export const url = '^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$|^https?:\\/\\/(localhost|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d+)?(\\/.*)?$'
+export const email = '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'
+export const phone = '^\\+[1-9]\\d{1,20}$'
+export const date = '^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$'
+export const time = '^([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z?$'
+export const datetime = '^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$'
+export const numeric = '^-?\\d+(\\.\\d+)?$'
+export const integer = '^-?\\d+$'

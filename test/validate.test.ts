@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { validate } from '../src/index'
+import { email, phone } from '../src/utils'
 import { AppsyncError } from './mocks'
 
 // Mock the @aws-appsync/utils module
@@ -88,7 +89,7 @@ describe('test validate function', () => {
       name: ['required'],
       age: ['required'],
       phone: ['nullable', ['regex', '^\\+39\\d+$']], // nullable allows null
-      email: ['required', 'email'],
+      email: ['required', ['regex', email]],
     })
     expect(result).toEqual(data)
   })
@@ -105,7 +106,7 @@ describe('test validate function', () => {
       name: ['required'],
       age: ['required'],
       phone: ['required', 'string', ['regex', '^\\+39\\d+$']], // nullable allows valid values
-      email: ['nullable', 'string', 'email'],
+      email: ['nullable', 'string', ['regex', email]],
     })
     expect(result).toEqual(data)
   })
@@ -122,8 +123,8 @@ describe('test validate function', () => {
       validate(data, {
         name: ['required'],
         age: ['required'],
-        phone: ['nullable', ['regex', '^\\+39\\d+$']], // nullable but invalid format
-        email: ['required', 'email'],
+        phone: ['nullable', ['regex', phone]], // nullable but invalid format
+        email: ['required', ['regex', email]],
       })
       expect(true).toBe(false)
     }

@@ -4,6 +4,7 @@ export interface Rule<T = unknown> {
   check: boolean
   message: string
   value: T
+  skipNext?: boolean
 }
 
 export type FullRule
@@ -15,15 +16,10 @@ export type FullRule
     | 'string'
     | 'array'
     | 'object'
-    | 'date'
     | ['min', number]
     | ['max', number]
     | ['between', number, number]
-    | 'email'
-    | 'url'
-    | 'uuid'
-    | 'ulid'
-    | ['regex', string]
+    | ['regex', ...string[]]
     | ['in', ...(string | number | boolean | null)[]]
     | ['notIn', ...(string | number | boolean | null)[]]
     | ['after', string]
