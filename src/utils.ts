@@ -2,7 +2,7 @@ import type { NestedKeyOf } from './types'
 import { util } from '@aws-appsync/utils'
 
 export function isArray(value: unknown): value is unknown[] {
-  return (typeof value === 'object' && !!value && Object.hasOwn(value, 'length')) && typeof (value as unknown[]).length === 'number'
+  return typeof value === 'object' && !!value && typeof (value as unknown[] | undefined)?.length === 'number'
 }
 
 export function getNestedValue<T extends { [key in keyof T & string]: T[key] }>(obj: Partial<T>, path: NestedKeyOf<T>): any {

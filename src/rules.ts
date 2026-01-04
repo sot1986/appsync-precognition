@@ -164,9 +164,9 @@ export function requiredRule<T>(value: T): Rule<T> {
 function nullableRule<T>(value: T): Rule<T> {
   const result: Rule<T> = {
     check: true,
-    message: '',
+    message: ':attribute must be nullable',
     value,
-    skipNext: typeof value === 'object' && !value,
+    skipNext: typeof value === 'undefined' || (typeof value === 'object' && !value),
   }
   return result
 }
@@ -174,7 +174,7 @@ function nullableRule<T>(value: T): Rule<T> {
 function sometimesRule<T>(value: T): Rule<T> {
   const result: Rule<T> = {
     check: true,
-    message: '',
+    message: ':attribute is not nullable',
     value,
   }
   if (typeof value === 'undefined') {
@@ -182,7 +182,6 @@ function sometimesRule<T>(value: T): Rule<T> {
     return result
   }
   if (typeof value === 'object' && !result.value) {
-    result.message = ':attribute is not nullable'
     result.check = false
     result.skipNext = true
     return result
