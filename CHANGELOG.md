@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/sot1986/appsync-precognition/compare/v0.2.6...v0.3.0) (2026-01-04)
+
+
+### Features
+
+* update formatAttributeName ([0827bcf](https://github.com/sot1986/appsync-precognition/commit/0827bcf8d702c3471cf9cd4e9e352b1fee3cc658))
+
 ## [0.2.6](https://github.com/sot1986/appsync-precognition/compare/v0.2.5...v0.2.6) (2026-01-04)
 
 
