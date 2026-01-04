@@ -6,7 +6,7 @@ export function isArray(value: unknown): value is unknown[] {
 }
 
 export function getNestedValue<T extends { [key in keyof T & string]: T[key] }>(obj: Partial<T>, path: NestedKeyOf<T>): any {
-  return path.split('.').reduce<unknown>((current, key) => util.matches('^\d+$', key)
+  return path.split('.').reduce<unknown>((current, key) => util.matches('^\\d+$', key)
     ? (current as unknown[])[Number(key)]
     : (current as Record<string, unknown>)[key], obj)
 }
@@ -25,12 +25,9 @@ export function setNestedValue<T extends { [key in keyof T & string]: T[key] }>(
 }
 
 export function getHeader(name: string, ctx: { request: { headers: any } }): string | null {
-  return Object.entries(ctx.request.headers)
-    .reduce((prev, [key, value]) => typeof prev === 'string'
-      ? prev
-      : (key.toLowerCase() === name.toLowerCase() && typeof value === 'string'
-          ? value
-          : null), null as string | null)
+  const lowerCaseName = name.toLowerCase()
+  const key = Object.keys(ctx.request.headers).find(h => h.toLowerCase() === lowerCaseName)
+  return key ? ctx.request.headers[key] : null
 }
 
 export function cleanString(value: string, options?: {

@@ -16,4 +16,22 @@ export default defineConfig({
   }),
   clean: true,
   format: 'esm',
+  minify: {
+    codegen: {
+      removeWhitespace: true,
+    },
+    mangle: {
+      keepNames: false,
+      toplevel: false,
+      debug: false,
+    },
+    compress: {
+      joinVars: false,
+      keepNames: {
+        function: true,
+        class: true,
+      },
+      dropDebugger: true,
+    },
+  },
 })
