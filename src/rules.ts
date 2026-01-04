@@ -15,9 +15,9 @@ export function parse<T>(value: T, rule: FullRule): Rule<T> {
     case 'sometimes':
       return sometimesRule(value)
     case 'min':
-      return minRule(value, (params[0]! as number))
+      return betweenRule(value, (params[0]! as number))
     case 'max':
-      return maxRule(value, (params[0] as number))
+      return betweenRule(value, undefined, (params[0] as number))
     case 'between':
       return betweenRule(value, (params[0] as number), params[1] as number)
     case 'regex':
@@ -26,16 +26,6 @@ export function parse<T>(value: T, rule: FullRule): Rule<T> {
       return inRule(value, ...params)
     case 'notIn':
       return notInRule(value, ...params)
-    case 'array':
-      return arrayRule(value)
-    case 'object':
-      return objectRule(value)
-    case 'boolean':
-      return booleanRule(value)
-    case 'number':
-      return numberRule(value)
-    case 'string':
-      return stringRule(value)
     case 'before':
       return beforeRule(value, params[0] as string)
     case 'after':
@@ -45,65 +35,34 @@ export function parse<T>(value: T, rule: FullRule): Rule<T> {
     case 'afterOrEqual':
       return afterOrEqualRule(value, params[0] as string)
     default:
-      return { check: false, message: `Unknown rule ${name}`, value }
+      return typeRule(value, name)
   }
-}
-
-function minRule<T>(value: T, minValue: number): Rule<T> {
-  const result: Rule<T> = {
-    check: false,
-    message: `:attribute must be greater than or equal to ${minValue}`,
-    value,
-  }
-  if (typeof value === 'number') {
-    result.check = value >= minValue
-  }
-  if (typeof value === 'string') {
-    result.check = value.length >= minValue
-  }
-  if (isArray(value)) {
-    result.check = value.length >= minValue
-    result.message = `Array must contain at least ${minValue} elements`
-  }
-  return result
-}
-
-function maxRule<T>(value: T, maxValue: number): Rule<T> {
-  const result: Rule<T> = {
-    check: false,
-    message: `:attribute must be less than or equal to ${maxValue}`,
-    value,
-  }
-
-  if (typeof value === 'number') {
-    result.check = value <= maxValue
-  }
-  if (typeof value === 'string') {
-    result.check = value.length <= maxValue
-    result.message = `String must contain at most ${maxValue} characters`
-  }
-  if (isArray(value)) {
-    result.check = value.length <= maxValue
-    result.message = `Array must contain at most ${maxValue} elements`
-  }
-  return result
 }
 
 function betweenRule<T>(value: T, minValue: number = -Infinity, maxValue: number = Infinity): Rule<T> {
+  const [min, max] = [minValue === -Infinity, maxValue === Infinity]
   const result: Rule<T> = {
     check: false,
-    message: `:attribute must be between ${minValue} and ${maxValue}`,
+    message: min ? `:attribute should be at most ${maxValue}` : max ? `:attribute should be at least ${minValue}` : `:attribute must be between ${minValue} and ${maxValue}`,
     value,
   }
   if (typeof value === 'number')
     result.check = value >= minValue && value <= maxValue
   if (typeof value === 'string') {
     result.check = value.length >= minValue && value.length <= maxValue
-    result.message = `String must contain between ${minValue} and ${maxValue} characters`
+    result.message = min
+      ? `String must not exceed ${maxValue} characters`
+      : max
+        ? `String must contain at least ${minValue} characters`
+        : `String must contain between ${minValue} and ${maxValue} characters`
   }
   if (isArray(value)) {
     result.check = value.length >= minValue && value.length <= maxValue
-    result.message = `Array must contain between ${minValue} and ${maxValue} elements`
+    result.message = min
+      ? `Array must not contain more than ${maxValue} elements`
+      : max
+        ? `Array must contain at least ${minValue} elements`
+        : `Array must contain between ${minValue} and ${maxValue} elements`
   }
   return result
 }
@@ -189,62 +148,27 @@ function sometimesRule<T>(value: T): Rule<T> {
   return requiredRule(value)
 }
 
-function arrayRule<T>(value: T): Rule<T> {
+function typeRule<T>(value: T, type: 'boolean' | 'object' | 'array' | 'number' | 'string'): Rule<T> {
   const result: Rule<T> = {
     check: false,
-    message: ':attribute must be an array',
+    message: `:attribute must be a ${type}`,
     value,
   }
-  if (isArray(value)) {
-    result.check = true
-  }
-  return result
-}
-
-function objectRule<T>(value: T): Rule<T> {
-  const result: Rule<T> = {
-    check: false,
-    message: ':attribute must be an object',
-    value,
-  }
-  if (typeof value === 'object' && !isArray(result.value)) {
-    result.check = true
-  }
-  return result
-}
-
-function booleanRule<T>(value: T): Rule<T> {
-  const result: Rule<T> = {
-    check: false,
-    message: ':attribute must be a boolean',
-    value,
-  }
-  if (typeof value === 'boolean') {
-    result.check = true
-  }
-  return result
-}
-
-function numberRule<T>(value: T): Rule<T> {
-  const result: Rule<T> = {
-    check: false,
-    message: ':attribute must be a number',
-    value,
-  }
-  if (typeof value === 'number') {
-    result.check = true
-  }
-  return result
-}
-
-function stringRule<T>(value: T): Rule<T> {
-  const result: Rule<T> = {
-    check: false,
-    message: ':attribute must be a string',
-    value,
-  }
-  if (typeof value === 'string') {
-    result.check = true
+  switch (type) {
+    case 'array':
+      result.check = isArray(value)
+      break
+    case 'object':
+      result.check = typeof value === 'object' && !!value && !isArray(value) && Object.keys(value).length > 0
+      break
+    case 'boolean':
+      result.check = typeof value === 'boolean'
+      break
+    case 'number':
+      result.check = typeof value === 'number'
+      break
+    default:
+      result.check = typeof value === 'string'
   }
   return result
 }

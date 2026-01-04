@@ -11,11 +11,9 @@ vi.mock('@aws-appsync/utils', async () => {
 
 describe.concurrent('test objectRule validation', () => {
   it.concurrent.each([
-    {},
     { key: 'value' },
     { name: 'John', age: 30 },
     { nested: { prop: 'value' } },
-    null, // null is an object in JavaScript
   ])('validates object values', (value) => {
     const result = rules.parse(value, 'object')
     expect(result.check).toBe(true)
@@ -29,6 +27,7 @@ describe.concurrent('test objectRule validation', () => {
     true,
     false,
     undefined,
+    {}, // empty objects
   ])('invalidates non-object values', (value) => {
     const result = rules.parse(value, 'object')
     expect(result.check).toBe(false)
