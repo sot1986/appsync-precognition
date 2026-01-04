@@ -1,3 +1,11 @@
+## [0.2.3](https://github.com/sot1986/appsync-precognition/compare/v0.2.2...v0.2.3) (2026-01-04)
+
+
+### Bug Fixes
+
+* Merge branch 'main' of github.com:sot1986/appsync-precognition ([12a19df](https://github.com/sot1986/appsync-precognition/commit/12a19dfa513495c7d48d7f835537446dc88d658c))
+* update implementation of getHeader ([bc56ceb](https://github.com/sot1986/appsync-precognition/commit/bc56ceb94d5228582fd3199535c36c1e187b8244))
+
 ## [0.2.2](https://github.com/sot1986/appsync-precognition/compare/v0.2.1...v0.2.2) (2026-01-04)
 
 
