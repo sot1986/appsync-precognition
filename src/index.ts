@@ -29,7 +29,7 @@ export function validate<T extends { [key in keyof T & string]: T[key] }>(
         ? rules.parse(value, rule)
         : { ...rule }
 
-      skip = result.skipNext ?? false
+      skip = !!result.skipNext || !result.check
 
       if (result.check)
         return
@@ -44,8 +44,6 @@ export function validate<T extends { [key in keyof T & string]: T[key] }>(
         data: null,
         errorInfo: { path, value },
       }
-
-      skip = true
     })
   })
 
@@ -95,6 +93,13 @@ export function formatAttributeName(path: string): string {
     if (util.matches('^\\d+$', part)) {
       return acc
     }
-    return acc ? `${acc} ${part.toLowerCase()}` : part.toLowerCase()
+    let words = ''
+    part.split('').forEach((char, idx) => {
+      if (idx !== 0 && util.matches('[A-Z]', char)) {
+        words += ' '
+      }
+      words += char.toLowerCase()
+    })
+    return acc ? `${acc} ${words}` : words
   }, '')
 }

@@ -166,7 +166,7 @@ function nullableRule<T>(value: T): Rule<T> {
     check: true,
     message: ':attribute must be nullable',
     value,
-    skipNext: typeof value === 'undefined' || (typeof value === 'object' && !value),
+    skipNext: typeof value === 'undefined' || value === null,
   }
   return result
 }
