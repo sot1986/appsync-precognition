@@ -25,13 +25,6 @@ export default defineConfig({
       toplevel: false,
       debug: false,
     },
-    compress: {
-      joinVars: false,
-      keepNames: {
-        function: true,
-        class: true,
-      },
-      dropDebugger: true,
-    },
+    compress: false,
   },
 })
