@@ -1,3 +1,10 @@
+## [0.2.5](https://github.com/sot1986/appsync-precognition/compare/v0.2.4...v0.2.5) (2026-01-04)
+
+
+### Bug Fixes
+
+* add toNumber function for casting strings to numbers ([8502bd6](https://github.com/sot1986/appsync-precognition/commit/8502bd641ba90ac2d4d77bf8ac3bd67ce6e19355))
+
 ## [0.2.4](https://github.com/sot1986/appsync-precognition/compare/v0.2.3...v0.2.4) (2026-01-04)
 
 
