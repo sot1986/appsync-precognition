@@ -1,3 +1,10 @@
+## [0.2.4](https://github.com/sot1986/appsync-precognition/compare/v0.2.3...v0.2.4) (2026-01-04)
+
+
+### Bug Fixes
+
+* remove compress from minification ([b0f19e0](https://github.com/sot1986/appsync-precognition/commit/b0f19e01e3905cc52806bfa909807736e0bbdc56))
+
 ## [0.2.3](https://github.com/sot1986/appsync-precognition/compare/v0.2.2...v0.2.3) (2026-01-04)
 
 
