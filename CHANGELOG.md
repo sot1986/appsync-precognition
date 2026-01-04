@@ -1,3 +1,10 @@
+## [0.3.2](https://github.com/sot1986/appsync-precognition/compare/v0.3.1...v0.3.2) (2026-01-04)
+
+
+### Bug Fixes
+
+* remove types rules under a generic rule ([57a5729](https://github.com/sot1986/appsync-precognition/commit/57a5729c25c7a9bfde9644f210c58b462de7ef8a))
+
 ## [0.3.1](https://github.com/sot1986/appsync-precognition/compare/v0.3.0...v0.3.1) (2026-01-04)
 
 
