@@ -1,3 +1,10 @@
+## [0.2.6](https://github.com/sot1986/appsync-precognition/compare/v0.2.5...v0.2.6) (2026-01-04)
+
+
+### Bug Fixes
+
+* update nullableRule to accept undefined ([95dd7cb](https://github.com/sot1986/appsync-precognition/commit/95dd7cbeb2deb2070ddcc5052e86ddda4a8e7aa5))
+
 ## [0.2.5](https://github.com/sot1986/appsync-precognition/compare/v0.2.4...v0.2.5) (2026-01-04)
 
 
