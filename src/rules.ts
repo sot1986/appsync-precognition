@@ -89,15 +89,14 @@ function maxRule<T>(value: T, maxValue: number): Rule<T> {
   return result
 }
 
-function betweenRule<T>(value: T, minValue: number, maxValue: number): Rule<T> {
+function betweenRule<T>(value: T, minValue: number = -Infinity, maxValue: number = Infinity): Rule<T> {
   const result: Rule<T> = {
     check: false,
     message: `:attribute must be between ${minValue} and ${maxValue}`,
     value,
   }
-  if (typeof value === 'number') {
+  if (typeof value === 'number')
     result.check = value >= minValue && value <= maxValue
-  }
   if (typeof value === 'string') {
     result.check = value.length >= minValue && value.length <= maxValue
     result.message = `String must contain between ${minValue} and ${maxValue} characters`

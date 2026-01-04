@@ -7,7 +7,7 @@ export function isArray(value: unknown): value is unknown[] {
 
 export function getNestedValue<T extends { [key in keyof T & string]: T[key] }>(obj: Partial<T>, path: NestedKeyOf<T>): any {
   return path.split('.').reduce<unknown>((current, key) => util.matches('^\\d+$', key)
-    ? (current as unknown[])[Number(key)]
+    ? (current as unknown[])[toNumber(key)]
     : (current as Record<string, unknown>)[key], obj)
 }
 
@@ -40,6 +40,17 @@ export function cleanString(value: string, options?: {
   if (options?.allowEmptyString)
     return parsed
   return parsed === '' ? null : parsed
+}
+
+export function toNumber(value: string): number {
+  switch (true) {
+    case util.matches('^(-|\\+)?\\d+(\\.\\d+)?$', value):
+      return +value
+    case util.matches('^(-|\\+)?Infinity$', value):
+      return +value
+    default:
+      util.error(`Invalid number: ${value}`)
+  }
 }
 
 export const uuid = '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
