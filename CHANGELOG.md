@@ -1,3 +1,10 @@
+## [0.3.1](https://github.com/sot1986/appsync-precognition/compare/v0.3.0...v0.3.1) (2026-01-04)
+
+
+### Bug Fixes
+
+* update uuid pattern to accept any version ([4908469](https://github.com/sot1986/appsync-precognition/commit/490846984887509089272eeea74285f739908d2c))
+
 # [0.3.0](https://github.com/sot1986/appsync-precognition/compare/v0.2.6...v0.3.0) (2026-01-04)
 
 
