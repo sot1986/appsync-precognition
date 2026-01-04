@@ -1,3 +1,10 @@
+## [0.2.2](https://github.com/sot1986/appsync-precognition/compare/v0.2.1...v0.2.2) (2026-01-04)
+
+
+### Bug Fixes
+
+* remove minification from deploy ([4636abb](https://github.com/sot1986/appsync-precognition/commit/4636abb7ed59f0bfc9253ee1bc5b83a65241dbd0))
+
 ## [0.2.1](https://github.com/sot1986/appsync-precognition/compare/v0.2.0...v0.2.1) (2026-01-04)
 
 
