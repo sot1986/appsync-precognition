@@ -1,3 +1,11 @@
+## [0.2.1](https://github.com/sot1986/appsync-precognition/compare/v0.2.0...v0.2.1) (2026-01-04)
+
+
+### Bug Fixes
+
+* pull from github ([a5afeac](https://github.com/sot1986/appsync-precognition/commit/a5afeac89f1608a7513990cd34637747e864d321))
+* update export to add utils. to the importable files ([d644879](https://github.com/sot1986/appsync-precognition/commit/d644879efd2a611cfe9f1738c63b7632a03654f4))
+
 # [0.2.0](https://github.com/sot1986/appsync-precognition/compare/v0.1.2...v0.2.0) (2026-01-04)
 
 
