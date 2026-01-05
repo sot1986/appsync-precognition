@@ -1,3 +1,10 @@
+## [0.3.3](https://github.com/sot1986/appsync-precognition/compare/v0.3.2...v0.3.3) (2026-01-05)
+
+
+### Bug Fixes
+
+* update api to allow custom message for FullRule ([6a4cc32](https://github.com/sot1986/appsync-precognition/commit/6a4cc32000c66d7674530bc8dd505feaed42e31b))
+
 ## [0.3.2](https://github.com/sot1986/appsync-precognition/compare/v0.3.1...v0.3.2) (2026-01-04)
 
 
