@@ -17,7 +17,7 @@ describe.concurrent('test beforeRule validation', () => {
     ['2023-06-15T12:00:00.000Z', '2023-06-15T12:00:01.000Z'], // 1 second before
     ['2022-12-31T23:59:59.999Z', '2023-01-01T00:00:00.000Z'], // before new year
   ])('validates date string before target', (value, target) => {
-    const result = rules.parse(value, ['before', target])
+    const result = rules.parse({ value }, ['before', target])
     expect(result.check).toBe(true)
   })
 
@@ -26,7 +26,7 @@ describe.concurrent('test beforeRule validation', () => {
     ['2023-06-15T12:00:01.000Z', '2023-06-15T12:00:00.000Z'], // 1 second after
     ['2023-01-01T00:00:00.000Z', '2023-01-01T00:00:00.000Z'], // same time (not before)
   ])('invalidates date string not before target', (value, target) => {
-    const result = rules.parse(value, ['before', target])
+    const result = rules.parse({ value }, ['before', target])
     expect(result.check).toBe(false)
   })
 
@@ -35,7 +35,7 @@ describe.concurrent('test beforeRule validation', () => {
     [1640995199000, '2023-01-01T00:00:00.000Z'], // timestamp before 2023
     [0, '1970-01-01T00:00:01.000Z'], // epoch before 1 second later
   ])('validates number timestamp before target', (value, target) => {
-    const result = rules.parse(value, ['before', target])
+    const result = rules.parse({ value }, ['before', target])
     expect(result.check).toBe(true)
   })
 
@@ -43,7 +43,7 @@ describe.concurrent('test beforeRule validation', () => {
     [1672531200000, '2023-01-01T00:00:00.000Z'], // timestamp after target
     [1672531200000, '2023-01-01T00:00:00.000Z'], // same timestamp (not before)
   ])('invalidates number timestamp not before target', (value, target) => {
-    const result = rules.parse(value, ['before', target])
+    const result = rules.parse({ value }, ['before', target])
     expect(result.check).toBe(false)
   })
 
@@ -54,7 +54,7 @@ describe.concurrent('test beforeRule validation', () => {
     [true, '2023-01-01T00:00:00.000Z'],
     [null, '2023-01-01T00:00:00.000Z'],
   ])('invalidates non-string/non-number values', (value, target) => {
-    const result = rules.parse(value, ['before', target])
+    const result = rules.parse({ value }, ['before', target])
     expect(result.check).toBe(false)
   })
 })

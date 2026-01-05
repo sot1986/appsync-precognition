@@ -20,7 +20,7 @@ describe.concurrent('test urlRule validation', () => {
     'https://site.com/path?query=value',
     'http://localhost:3000',
   ])('validates valid url', (value) => {
-    const result = rules.parse(value, ['regex', url])
+    const result = rules.parse({ value }, ['regex', url])
     expect(result.check).toBe(true)
   })
 
@@ -35,7 +35,7 @@ describe.concurrent('test urlRule validation', () => {
     '',
     null,
   ])('invalidates invalid url', (value) => {
-    const result = rules.parse(value, ['regex', url])
+    const result = rules.parse({ value }, ['regex', url])
     expect(result.check).toBe(false)
   })
 
@@ -46,7 +46,7 @@ describe.concurrent('test urlRule validation', () => {
     {},
     true,
   ])('invalidates non-string values', (value) => {
-    const result = rules.parse(value, ['regex', url])
+    const result = rules.parse({ value }, ['regex', url])
     expect(result.check).toBe(false)
   })
 })

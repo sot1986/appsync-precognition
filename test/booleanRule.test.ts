@@ -14,7 +14,7 @@ describe.concurrent('test booleanRule validation', () => {
     true,
     false,
   ])('validates boolean values', (value) => {
-    const result = rules.parse(value, 'boolean')
+    const result = rules.parse({ value }, 'boolean')
     expect(result.check).toBe(true)
   })
 
@@ -29,7 +29,7 @@ describe.concurrent('test booleanRule validation', () => {
     {},
     'string',
   ])('invalidates non-boolean values', (value) => {
-    const result = rules.parse(value, 'boolean')
+    const result = rules.parse({ value }, 'boolean')
     expect(result.check).toBe(false)
   })
 })

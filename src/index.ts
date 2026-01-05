@@ -1,11 +1,19 @@
-import type { FullRule, NestedKeyOf, Rule } from './types'
+import type { CustomFullRule, FullRule, NestedKeyOf, ParsedRule, Rule } from './types'
 import { runtime, util } from '@aws-appsync/utils'
 import * as rules from './rules'
-import { cleanString, getHeader, getNestedValue, isArray, setNestedValue } from './utils'
+import { cleanString, getHeader, getNestedValue, setNestedValue } from './utils'
+
+function isRule<T>(rule: FullRule | CustomFullRule<T> | Rule<T>): rule is Rule<T> {
+  return typeof rule === 'object' && !!rule && Object.hasOwn(rule, 'check')
+}
+
+function isCustomFullRule<T>(rule: FullRule | CustomFullRule<T> | Rule<T>): rule is CustomFullRule<T> {
+  return typeof rule === 'object' && !!rule && Object.hasOwn(rule, 'rule')
+}
 
 export function validate<T extends { [key in keyof T & string]: T[key] }>(
   obj: Partial<T>,
-  checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule<T>)[]>>,
+  checks: Partial<Record<NestedKeyOf<T>, (FullRule | CustomFullRule<T> | Rule<T>)[]>>,
   options?: {
     trim?: boolean
     allowEmptyString?: boolean
@@ -25,9 +33,11 @@ export function validate<T extends { [key in keyof T & string]: T[key] }>(
       if (skip)
         return
 
-      const result = (typeof rule === 'string' || isArray(rule))
-        ? rules.parse(value, rule)
-        : { ...rule }
+      const result: ParsedRule<T> = isRule(rule)
+        ? { ...rule, message: rule.message ?? ':attribute is invalid' }
+        : isCustomFullRule(rule)
+          ? rules.parse<T>({ value, message: rule.message }, rule.rule)
+          : rules.parse<T>({ value }, rule)
 
       skip = !!result.skipNext || !result.check
 
@@ -37,7 +47,9 @@ export function validate<T extends { [key in keyof T & string]: T[key] }>(
       if (error.msg)
         util.appendError(error.msg, error.errorType, error.data, error.errorInfo)
 
-      result.message = result.message.replace(':attribute', formatAttributeName(path))
+      if (util.matches(':attribute', result.message))
+        result.message = result.message.replace(':attribute', formatAttributeName(path))
+
       error = {
         msg: result.message,
         errorType: 'ValidationError',
@@ -58,7 +70,7 @@ export function precognitiveValidation<
   T extends { [key in keyof T & string]: T[key] },
 >(
   ctx: { request: { headers: any }, args: Partial<T> },
-  checks: Partial<Record<NestedKeyOf<T>, (FullRule | Rule<T>)[]>>,
+  checks: Partial<Record<NestedKeyOf<T>, (FullRule | CustomFullRule<T> | Rule<T>)[]>>,
   options?: {
     trim?: boolean
     allowEmptyString?: boolean

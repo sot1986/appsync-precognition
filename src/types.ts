@@ -1,12 +1,5 @@
 export {}
 
-export interface Rule<T = unknown> {
-  check: boolean
-  message: string
-  value: T
-  skipNext?: boolean
-}
-
 export type FullRule
   = 'required'
     | 'nullable'
@@ -26,6 +19,35 @@ export type FullRule
     | ['before', string]
     | ['afterOrEqual', string]
     | ['beforeOrEqual', string]
+
+export interface CustomFullRule<T = unknown> {
+  rule: FullRule
+  value: T
+  message?: string
+  skipNext?: boolean
+  attribute?: string
+}
+
+export interface Rule<T = unknown> {
+  check: boolean
+  value: T
+  message?: string
+  skipNext?: boolean
+  attribute?: string
+}
+
+export interface ParsedRule<T = unknown> {
+  check: boolean
+  value: T
+  message: string
+  skipNext?: boolean
+  attribute?: string
+}
+
+export interface ParseOptions<T> {
+  value: T
+  message?: string
+}
 
 type ArrayKeys<T extends unknown[]>
   = T extends [unknown, ...unknown[]]

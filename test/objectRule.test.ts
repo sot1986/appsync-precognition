@@ -15,7 +15,7 @@ describe.concurrent('test objectRule validation', () => {
     { name: 'John', age: 30 },
     { nested: { prop: 'value' } },
   ])('validates object values', (value) => {
-    const result = rules.parse(value, 'object')
+    const result = rules.parse({ value }, 'object')
     expect(result.check).toBe(true)
   })
 
@@ -29,7 +29,7 @@ describe.concurrent('test objectRule validation', () => {
     undefined,
     {}, // empty objects
   ])('invalidates non-object values', (value) => {
-    const result = rules.parse(value, 'object')
+    const result = rules.parse({ value }, 'object')
     expect(result.check).toBe(false)
   })
 })

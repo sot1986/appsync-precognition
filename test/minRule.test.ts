@@ -7,7 +7,7 @@ describe.concurrent('test minRule validation', () => {
     'a'.repeat(10),
     'a'.repeat(500),
   ])('validates min length string', (value) => {
-    const result = rules.parse(value, ['min', 2])
+    const result = rules.parse({ value }, ['min', 2])
     expect(result.check).toBe(true)
   })
 
@@ -16,7 +16,7 @@ describe.concurrent('test minRule validation', () => {
     'a',
     null,
   ])('invalidates min length string', (value) => {
-    const result = rules.parse(value, ['min', 2])
+    const result = rules.parse({ value }, ['min', 2])
     expect(result.check).toBe(false)
   })
 
@@ -25,7 +25,7 @@ describe.concurrent('test minRule validation', () => {
     [1, 2, 3] as unknown[],
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as unknown[],
   ])('validates min length array', (...value) => {
-    const result = rules.parse(value, ['min', 2])
+    const result = rules.parse({ value }, ['min', 2])
     expect(result.check).toBe(true)
   })
 
@@ -33,7 +33,7 @@ describe.concurrent('test minRule validation', () => {
     [1] as unknown[],
     [null],
   ])('invalidates min length array', (...value) => {
-    const result = rules.parse(value, ['min', 2])
+    const result = rules.parse({ value }, ['min', 2])
     expect(result.check).toBe(false)
   })
 
@@ -42,7 +42,7 @@ describe.concurrent('test minRule validation', () => {
     2,
     2.0,
   ])('validates min number', (value) => {
-    const result = rules.parse(value, ['min', 2])
+    const result = rules.parse({ value }, ['min', 2])
     expect(result.check).toBe(true)
   })
 
@@ -51,7 +51,7 @@ describe.concurrent('test minRule validation', () => {
     0,
     -5,
   ])('invalidates min length number', (value) => {
-    const result = rules.parse(value, ['min', 2])
+    const result = rules.parse({ value }, ['min', 2])
     expect(result.check).toBe(false)
   })
 })

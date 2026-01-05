@@ -20,7 +20,7 @@ describe.concurrent('test nullableRule validation', () => {
     [],
     {},
   ])('validates all values as nullable', (value) => {
-    const result = rules.parse(value, 'nullable')
+    const result = rules.parse({ value }, 'nullable')
     expect(result.check).toBe(true)
   })
 
@@ -33,7 +33,7 @@ describe.concurrent('test nullableRule validation', () => {
     [[], false],
     [{}, false],
   ])('sets skipNext correctly based on value type', (value, expectedSkipNext) => {
-    const result = rules.parse(value, 'nullable')
+    const result = rules.parse({ value }, 'nullable')
     expect(result.skipNext).toBe(expectedSkipNext)
   })
 })

@@ -18,7 +18,7 @@ describe.concurrent('test dateRule validation', () => {
     '2022-02-28T08:15:30.123456Z', // microseconds
     '1970-01-01T00:00:00.000Z',
   ])('validates valid ISO date string', (value) => {
-    const result = rules.parse(value, ['regex', datetime])
+    const result = rules.parse({ value }, ['regex', datetime])
     expect(result.check).toBe(true)
   })
 
@@ -34,7 +34,7 @@ describe.concurrent('test dateRule validation', () => {
     '',
     null,
   ])('invalidates invalid date string', (value) => {
-    const result = rules.parse(value, ['regex', datetime])
+    const result = rules.parse({ value }, ['regex', datetime])
     expect(result.check).toBe(false)
   })
 
@@ -44,7 +44,7 @@ describe.concurrent('test dateRule validation', () => {
     0, // epoch
     Date.now(), // current timestamp
   ])('validates number timestamps', (value) => {
-    const result = rules.parse(String(value), ['regex', datetime, integer])
+    const result = rules.parse({ value: String(value) }, ['regex', datetime, integer])
     expect(result.check).toBe(true)
   })
 })

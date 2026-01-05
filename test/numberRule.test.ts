@@ -21,7 +21,7 @@ describe.concurrent('test numberRule validation', () => {
     Number.MAX_VALUE,
     Number.MIN_VALUE,
   ])('validates number values', (value) => {
-    const result = rules.parse(value, 'number')
+    const result = rules.parse({ value }, 'number')
     expect(result.check).toBe(true)
   })
 
@@ -35,7 +35,7 @@ describe.concurrent('test numberRule validation', () => {
     [],
     {},
   ])('invalidates non-number values', (value) => {
-    const result = rules.parse(value, 'number')
+    const result = rules.parse({ value }, 'number')
     expect(result.check).toBe(false)
   })
 })

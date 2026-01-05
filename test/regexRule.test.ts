@@ -16,7 +16,7 @@ describe.concurrent('test regexRule validation', () => {
     ['123', '^[0-9]+$'],
     ['test@example.com', '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'],
   ])('validates string matching regex pattern', (value, pattern) => {
-    const result = rules.parse(value, [`regex`, pattern])
+    const result = rules.parse({ value }, [`regex`, pattern])
     expect(result.check).toBe(true)
   })
 
@@ -27,7 +27,7 @@ describe.concurrent('test regexRule validation', () => {
     ['', '^[a-z]+$'],
     ['ABC', '^[a-z]+$'],
   ])('invalidates string not matching regex pattern', (value, pattern) => {
-    const result = rules.parse(value, [`regex`, pattern])
+    const result = rules.parse({ value }, [`regex`, pattern])
     expect(result.check).toBe(false)
   })
 
@@ -39,7 +39,7 @@ describe.concurrent('test regexRule validation', () => {
     true,
     null,
   ])('invalidates non-string values', (value) => {
-    const result = rules.parse(value, ['regex', '^[a-z]+$'])
+    const result = rules.parse({ value }, ['regex', '^[a-z]+$'])
     expect(result.check).toBe(false)
   })
 })
