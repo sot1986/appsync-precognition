@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -19,7 +20,7 @@ describe.concurrent('test stringRule validation', () => {
     'true',
     ' ',
   ])('validates string values', (value) => {
-    const result = rules.parse({ value }, 'string')
+    const result = rules.parse({ value, errors }, 'string')
     expect(result.check).toBe(true)
   })
 
@@ -33,7 +34,7 @@ describe.concurrent('test stringRule validation', () => {
     {},
     0,
   ])('invalidates non-string values', (value) => {
-    const result = rules.parse({ value }, 'string')
+    const result = rules.parse({ value, errors }, 'string')
     expect(result.check).toBe(false)
   })
 })

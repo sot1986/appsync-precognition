@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -20,7 +21,7 @@ describe.concurrent('test nullableRule validation', () => {
     [],
     {},
   ])('validates all values as nullable', (value) => {
-    const result = rules.parse({ value }, 'nullable')
+    const result = rules.parse({ value, errors }, 'nullable')
     expect(result.check).toBe(true)
   })
 
@@ -33,7 +34,7 @@ describe.concurrent('test nullableRule validation', () => {
     [[], false],
     [{}, false],
   ])('sets skipNext correctly based on value type', (value, expectedSkipNext) => {
-    const result = rules.parse({ value }, 'nullable')
+    const result = rules.parse({ value, errors }, 'nullable')
     expect(result.skipNext).toBe(expectedSkipNext)
   })
 })

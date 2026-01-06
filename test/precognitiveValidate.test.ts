@@ -1,6 +1,6 @@
-import type { Context } from '@aws-appsync/utils'
+import type { Ctx } from '../src/types'
 import { describe, expect, it, vi } from 'vitest'
-import { precognitiveValidation } from '../src/index'
+import { assertValidated, precognitiveValidation } from '../src/index'
 import { AppsyncError, EarlyReturnError } from './mocks'
 
 // Mock the @aws-appsync/utils module
@@ -14,10 +14,11 @@ vi.mock('@aws-appsync/utils', async () => {
 
 describe.concurrent('test precognitiveValidation function', () => {
   it('returns validate result when not precognitive request', () => {
-    const ctx = {
+    const ctx: Ctx<{ name: string, age: number }> = {
       request: { headers: {} },
       args: { name: 'Marco', age: 25 },
-    } as any
+      stash: {},
+    }
 
     const result = precognitiveValidation(ctx, {
       name: ['required'],
@@ -28,10 +29,11 @@ describe.concurrent('test precognitiveValidation function', () => {
   })
 
   it('validates all fields and early returns when precognitive without validate-only header', () => {
-    const ctx = {
+    const ctx: Ctx<{ name: string, age: number }> = {
       request: { headers: { precognition: 'true' } },
       args: { name: 'Marco', age: 25 },
-    } as any
+      stash: {},
+    }
 
     expect(() => {
       precognitiveValidation(ctx, {
@@ -39,10 +41,13 @@ describe.concurrent('test precognitiveValidation function', () => {
         age: ['required', ['min', 18]],
       })
     }).toThrow(new EarlyReturnError('Early return'))
+
+    assertValidated(ctx)
+    expect(ctx.stash.__validated).toEqual({ name: 'Marco', age: 25 })
   })
 
   it('validates only specified fields when precognitive with validate-only header', () => {
-    const ctx = {
+    const ctx: Ctx<{ name: string, age: number, email: string }> = {
       request: {
         headers: {
           'precognition': 'true',
@@ -50,7 +55,8 @@ describe.concurrent('test precognitiveValidation function', () => {
         },
       },
       args: { name: 'Marco', age: 25, email: 'invalid' },
-    } as any
+      stash: {},
+    }
 
     expect(() => {
       precognitiveValidation(ctx, {
@@ -62,7 +68,7 @@ describe.concurrent('test precognitiveValidation function', () => {
   })
 
   it('throws validation error for invalid precognitive fields', () => {
-    const ctx = {
+    const ctx: Ctx<{ name: string, age: number, email?: string | null }> = {
       request: {
         headers: {
           'precognition': 'true',
@@ -70,7 +76,8 @@ describe.concurrent('test precognitiveValidation function', () => {
         },
       },
       args: { name: '', age: 25 },
-    } as Context<{ name: string, age: number, email?: string | null }>
+      stash: {},
+    }
 
     expect(() => {
       precognitiveValidation(ctx, {

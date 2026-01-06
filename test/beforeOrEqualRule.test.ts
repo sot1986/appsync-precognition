@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -16,7 +17,7 @@ describe.concurrent('test beforeOrEqualRule validation', () => {
     ['2023-01-01T00:00:00.000Z', '2023-01-01T00:00:00.000Z'], // same time (equal)
     ['2022-12-31T23:59:59.999Z', '2023-01-01T00:00:00.000Z'], // before new year
   ])('validates date string before or equal to target', (value, target) => {
-    const result = rules.parse({ value }, ['beforeOrEqual', target])
+    const result = rules.parse({ value, errors }, ['beforeOrEqual', target])
     expect(result.check).toBe(true)
   })
 
@@ -25,7 +26,7 @@ describe.concurrent('test beforeOrEqualRule validation', () => {
     ['2023-06-15T12:00:01.000Z', '2023-06-15T12:00:00.000Z'], // 1 second after
     ['2023-01-01T00:00:00.001Z', '2023-01-01T00:00:00.000Z'], // 1 millisecond after
   ])('invalidates date string after target', (value, target) => {
-    const result = rules.parse({ value }, ['beforeOrEqual', target])
+    const result = rules.parse({ value, errors }, ['beforeOrEqual', target])
     expect(result.check).toBe(false)
   })
 
@@ -35,7 +36,7 @@ describe.concurrent('test beforeOrEqualRule validation', () => {
     [0, '1970-01-01T00:00:01.000Z'], // epoch before 1 second later
     [1672531200000, '2023-01-01T00:00:00.000Z'], // same timestamp (equal)
   ])('validates number timestamp before or equal to target', (value, target) => {
-    const result = rules.parse({ value }, ['beforeOrEqual', target])
+    const result = rules.parse({ value, errors }, ['beforeOrEqual', target])
     expect(result.check).toBe(true)
   })
 
@@ -43,7 +44,7 @@ describe.concurrent('test beforeOrEqualRule validation', () => {
     [1672531201000, '2023-01-01T00:00:00.000Z'], // timestamp after target
     [1000, '1970-01-01T00:00:00.000Z'], // 1 second after epoch
   ])('invalidates number timestamp after target', (value, target) => {
-    const result = rules.parse({ value }, ['beforeOrEqual', target])
+    const result = rules.parse({ value, errors }, ['beforeOrEqual', target])
     expect(result.check).toBe(false)
   })
 
@@ -54,7 +55,7 @@ describe.concurrent('test beforeOrEqualRule validation', () => {
     [true, '2023-01-01T00:00:00.000Z'],
     [null, '2023-01-01T00:00:00.000Z'],
   ])('invalidates non-string/non-number values', (value, target) => {
-    const result = rules.parse({ value }, ['beforeOrEqual', target])
+    const result = rules.parse({ value, errors }, ['beforeOrEqual', target])
     expect(result.check).toBe(false)
   })
 })

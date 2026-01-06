@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -17,14 +18,14 @@ describe.concurrent('test requiredRule validation', () => {
     '0',
     ' ',
   ])('validates non-empty string', (value) => {
-    const result = rules.parse({ value }, 'required')
+    const result = rules.parse({ value, errors }, 'required')
     expect(result.check).toBe(true)
   })
 
   it.concurrent.each([
     '',
   ])('invalidates empty string', (value) => {
-    const result = rules.parse({ value }, 'required')
+    const result = rules.parse({ value, errors }, 'required')
     expect(result.check).toBe(false)
   })
 
@@ -34,14 +35,14 @@ describe.concurrent('test requiredRule validation', () => {
     [1, 2, 3],
     ['a', 'b'],
   ])('validates non-empty array', (...value) => {
-    const result = rules.parse({ value }, 'required')
+    const result = rules.parse({ value, errors }, 'required')
     expect(result.check).toBe(true)
   })
 
   it.concurrent.each([
     [] as unknown[],
   ])('invalidates empty array', (...value) => {
-    const result = rules.parse({ value }, 'required')
+    const result = rules.parse({ value, errors }, 'required')
     expect(result.check).toBe(false)
   })
 
@@ -53,7 +54,7 @@ describe.concurrent('test requiredRule validation', () => {
     3.14,
     -5.5,
   ])('validates any number', (value) => {
-    const result = rules.parse({ value }, 'required')
+    const result = rules.parse({ value, errors }, 'required')
     expect(result.check).toBe(true)
   })
 
@@ -62,7 +63,7 @@ describe.concurrent('test requiredRule validation', () => {
     null,
     undefined,
   ])('invalidates other value types', (value) => {
-    const result = rules.parse({ value }, 'required')
+    const result = rules.parse({ value, errors }, 'required')
     expect(result.check).toBe(false)
   })
 })

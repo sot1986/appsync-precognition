@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -15,7 +16,7 @@ describe.concurrent('test objectRule validation', () => {
     { name: 'John', age: 30 },
     { nested: { prop: 'value' } },
   ])('validates object values', (value) => {
-    const result = rules.parse({ value }, 'object')
+    const result = rules.parse({ value, errors }, 'object')
     expect(result.check).toBe(true)
   })
 
@@ -29,7 +30,7 @@ describe.concurrent('test objectRule validation', () => {
     undefined,
     {}, // empty objects
   ])('invalidates non-object values', (value) => {
-    const result = rules.parse({ value }, 'object')
+    const result = rules.parse({ value, errors }, 'object')
     expect(result.check).toBe(false)
   })
 })

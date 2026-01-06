@@ -1,4 +1,4 @@
-import type { NestedKeyOf } from './types'
+import type { ErrorMsgParams, NestedKeyOf, ValidationErrors } from './types'
 import { util } from '@aws-appsync/utils'
 
 export function isArray(value: unknown): value is unknown[] {
@@ -63,3 +63,49 @@ export const time = '^([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z?$'
 export const datetime = '^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$'
 export const numeric = '^-?\\d+(\\.\\d+)?$'
 export const integer = '^-?\\d+$'
+
+export const baseErrors: ValidationErrors = {
+  maxNumber: ':attr max value is :max',
+  minNumber: ':attr min value is :min',
+  betweenNumber: ':attr value must be between :min and :max',
+  biggerNumber: ':attr must be bigger than :min',
+  lowerNumber: ':attr must be lower than :max',
+  withinNumber: ':attr must be within :min and :max',
+  maxString: ':attr must not exceed :max characters',
+  minString: ':attr must have at least :min characters',
+  betweenString: ':attr must have between :min and :max characters',
+  minArray: ':attr must have at least :min elements',
+  maxArray: ':attr must have at most :max elements',
+  betweenArray: ':attr must have between :min and :max elements',
+  in: ':attr must be one of the specified values: :in',
+  notIn: ':attr must not be one of this list: :notIn',
+  email: ':attr must be a valid email address (name@domain.com)',
+  phone: ':attr must be a valid phone number (+123...)',
+  url: ':attr must be a valid URL (:pattern)',
+  uuid: ':attr must be a valid UUID (:pattern)',
+  ulid: ':attr must be a valid ULID (:pattern)',
+  date: ':attr must be a valid date (:pattern)',
+  time: ':attr must be a valid time (:pattern)',
+  datetime: ':attr must be a valid datetime (:pattern)',
+  numeric: ':attr must be a valid number (:pattern)',
+  integer: ':attr must be a valid integer (:pattern)',
+  type: ':attr is not valid :type',
+  regex: ':attr must match :pattern',
+  regex_patterns: 'attr: must match any of :patterns',
+  required: ':attr is required',
+  nullable: ':attr is nullable',
+  sometimes: ':attr cannot be null',
+  before: ':attr must be before :before',
+  beforeOrEqual: ':attr must be before or equal to :beforeOrEqual',
+  after: ':attr must be after :after',
+  afterOrEqual: ':attr must be after or equal to :afterOrEqual',
+  invalid: ':attr is not valid',
+}
+
+export function parseErrorMessage(msg: string, params?: ErrorMsgParams): string {
+  let parsedMsg = msg
+  Object.entries(params ?? {}).forEach(([key, value]) => {
+    parsedMsg = parsedMsg.replaceAll(key, value)
+  })
+  return parsedMsg
+}

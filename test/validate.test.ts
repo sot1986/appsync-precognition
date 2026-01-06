@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { validate } from '../src/index'
-import { email, phone } from '../src/utils'
+import { baseErrors, email } from '../src/utils'
 import { AppsyncError } from './mocks'
 
 // Mock the @aws-appsync/utils module
@@ -105,8 +105,8 @@ describe('test validate function', () => {
     const result = validate(data, {
       name: ['required'],
       age: ['required'],
-      phone: ['required', 'string', ['regex', '^\\+39\\d+$']], // nullable allows valid values
-      email: ['nullable', 'string', ['regex', email]],
+      phone: ['required', 'string', 'phone'], // nullable allows valid values
+      email: ['nullable', 'string', 'email'],
     })
     expect(result).toEqual(data)
   })
@@ -123,8 +123,8 @@ describe('test validate function', () => {
       validate(data, {
         name: ['required'],
         age: ['required'],
-        phone: ['nullable', ['regex', phone]], // nullable but invalid format
-        email: ['required', ['regex', email]],
+        phone: ['nullable', 'phone'], // nullable but invalid format
+        email: ['required', 'email'],
       })
       expect(true).toBe(false)
     }
@@ -133,7 +133,7 @@ describe('test validate function', () => {
       if (!(error instanceof AppsyncError)) {
         throw new Error('This should not happen')
       }
-      expect(error.message).toBe('phone must match the specified regular expression')
+      expect(error.message).toBe(baseErrors.phone.replace(':attr', 'phone'))
     }
   })
 
@@ -147,8 +147,7 @@ describe('test validate function', () => {
       validate<{ name: string, hobbies: string[] }>(data, {
         'name': ['required'],
         'hobbies': ['required', 'array', ['min', 1]],
-        'hobbies.0': ['required', 'string', ['max', 50]],
-        'hobbies.1': ['required', 'string', ['max', 50]],
+        'hobbies.*': ['required', 'string', ['max', 50]],
       })
       expect(false).toBe(true)
     }
@@ -157,7 +156,7 @@ describe('test validate function', () => {
       if (!(error instanceof AppsyncError)) {
         throw new Error('This should not happen')
       }
-      expect(error.message).toBe('hobbies is not nullable')
+      expect(error.message).toBe('hobbies is required')
       expect(error.errors).toHaveLength(1)
     }
   })

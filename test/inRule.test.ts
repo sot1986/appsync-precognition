@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -17,7 +18,7 @@ describe.concurrent('test inRule validation', () => {
     ['red', 'red,green,blue'],
     ['active', 'active,inactive,pending'],
   ])('validates string in allowed values', (value, allowedValues) => {
-    const result = rules.parse({ value }, ['in', ...allowedValues.split(',')])
+    const result = rules.parse({ value, errors }, ['in', ...allowedValues.split(',')])
     expect(result.check).toBe(true)
   })
 
@@ -27,7 +28,7 @@ describe.concurrent('test inRule validation', () => {
     ['deleted', 'active,inactive,pending'],
     ['', 'apple,banana,orange'],
   ])('invalidates string not in allowed values', (value, allowedValues) => {
-    const result = rules.parse({ value }, ['in', ...allowedValues])
+    const result = rules.parse({ value, errors }, ['in', ...allowedValues])
     expect(result.check).toBe(false)
   })
 
@@ -37,7 +38,7 @@ describe.concurrent('test inRule validation', () => {
     [2, 1, 2, 3],
     [10, 10, 20, 30],
   ])('validates number in allowed values', (value, ...allowedValues) => {
-    const result = rules.parse({ value }, ['in', ...allowedValues])
+    const result = rules.parse({ value, errors }, ['in', ...allowedValues])
     expect(result.check).toBe(true)
   })
 
@@ -46,7 +47,7 @@ describe.concurrent('test inRule validation', () => {
     [0, 1, 2, 3],
     [15, 10, 20, 30],
   ])('invalidates number not in allowed values', (value, ...allowedValues) => {
-    const result = rules.parse({ value }, ['in', ...allowedValues])
+    const result = rules.parse({ value, errors }, ['in', ...allowedValues])
     expect(result.check).toBe(false)
   })
 
@@ -57,7 +58,7 @@ describe.concurrent('test inRule validation', () => {
     [true, 'apple,banana,orange'],
     [null, 'apple,banana,orange'],
   ])('invalidates non-string/non-number values', (value, allowedValues) => {
-    const result = rules.parse({ value }, ['in', ...allowedValues])
+    const result = rules.parse({ value, errors }, ['in', ...allowedValues])
     expect(result.check).toBe(false)
   })
 })

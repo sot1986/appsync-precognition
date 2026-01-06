@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
-import { uuid } from '../src/utils'
+import { baseErrors as errors, uuid } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -20,7 +20,7 @@ describe.concurrent('test uuidRule validation', () => {
     'b68ef280-70a1-7063-9875-c341eeec7f04', // uuid v7
     '123e4567-e89b-12d3-c456-426614174000', // variant (c)
   ])('validates valid uuid', (value) => {
-    const result = rules.parse({ value }, ['regex', uuid])
+    const result = rules.parse({ value, errors }, ['regex', uuid])
     expect(result.check).toBe(true)
   })
 
@@ -34,7 +34,7 @@ describe.concurrent('test uuidRule validation', () => {
     '',
     null,
   ])('invalidates invalid uuid', (value) => {
-    const result = rules.parse({ value }, ['regex', uuid])
+    const result = rules.parse({ value, errors }, ['regex', uuid])
     expect(result.check).toBe(false)
   })
 
@@ -45,7 +45,7 @@ describe.concurrent('test uuidRule validation', () => {
     {},
     true,
   ])('invalidates non-string values', (value) => {
-    const result = rules.parse({ value }, ['regex', uuid])
+    const result = rules.parse({ value, errors }, ['regex', uuid])
     expect(result.check).toBe(false)
   })
 })

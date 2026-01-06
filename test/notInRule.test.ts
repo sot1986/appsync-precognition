@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -16,7 +17,7 @@ describe.concurrent('test notInRule validation', () => {
     ['deleted', 'active,inactive,pending'],
     ['', 'apple,banana,orange'],
   ])('validates string not in forbidden values', (value, forbiddenValues) => {
-    const result = rules.parse({ value }, ['notIn', ...forbiddenValues.split(',')])
+    const result = rules.parse({ value, errors }, ['notIn', ...forbiddenValues.split(',')])
     expect(result.check).toBe(true)
   })
 
@@ -26,7 +27,7 @@ describe.concurrent('test notInRule validation', () => {
     ['red', 'red,green,blue'],
     ['active', 'active,inactive,pending'],
   ])('invalidates string in forbidden values', (value, forbiddenValues) => {
-    const result = rules.parse({ value }, ['notIn', ...forbiddenValues.split(',')])
+    const result = rules.parse({ value, errors }, ['notIn', ...forbiddenValues.split(',')])
     expect(result.check).toBe(false)
   })
 
@@ -36,7 +37,7 @@ describe.concurrent('test notInRule validation', () => {
     [25, 1, 2, 3],
     [100, 10, 20, 30],
   ])('validates number not in forbidden values', (value, ...forbiddenValues) => {
-    const result = rules.parse({ value }, ['notIn', ...forbiddenValues])
+    const result = rules.parse({ value, errors }, ['notIn', ...forbiddenValues])
     expect(result.check).toBe(true)
   })
 
@@ -45,7 +46,7 @@ describe.concurrent('test notInRule validation', () => {
     [2, 1, 2, 3],
     [10, 10, 20, 30],
   ])('invalidates number in forbidden values', (value, ...forbiddenValues) => {
-    const result = rules.parse({ value }, ['notIn', ...forbiddenValues])
+    const result = rules.parse({ value, errors }, ['notIn', ...forbiddenValues])
     expect(result.check).toBe(false)
   })
 
@@ -56,7 +57,7 @@ describe.concurrent('test notInRule validation', () => {
     [true, 'apple,banana,orange'],
     [null, 'apple,banana,orange'],
   ])('accept non-string/non-number values', (value, forbiddenValues) => {
-    const result = rules.parse({ value }, ['notIn', ...forbiddenValues.split(',')])
+    const result = rules.parse({ value, errors }, ['notIn', ...forbiddenValues.split(',')])
     expect(result.check).toBe(true)
   })
 })

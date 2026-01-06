@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -21,7 +22,7 @@ describe.concurrent('test numberRule validation', () => {
     Number.MAX_VALUE,
     Number.MIN_VALUE,
   ])('validates number values', (value) => {
-    const result = rules.parse({ value }, 'number')
+    const result = rules.parse({ value, errors }, 'number')
     expect(result.check).toBe(true)
   })
 
@@ -35,7 +36,7 @@ describe.concurrent('test numberRule validation', () => {
     [],
     {},
   ])('invalidates non-number values', (value) => {
-    const result = rules.parse({ value }, 'number')
+    const result = rules.parse({ value, errors }, 'number')
     expect(result.check).toBe(false)
   })
 })

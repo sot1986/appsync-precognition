@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -14,7 +15,7 @@ describe.concurrent('test booleanRule validation', () => {
     true,
     false,
   ])('validates boolean values', (value) => {
-    const result = rules.parse({ value }, 'boolean')
+    const result = rules.parse({ value, errors }, 'boolean')
     expect(result.check).toBe(true)
   })
 
@@ -29,7 +30,7 @@ describe.concurrent('test booleanRule validation', () => {
     {},
     'string',
   ])('invalidates non-boolean values', (value) => {
-    const result = rules.parse({ value }, 'boolean')
+    const result = rules.parse({ value, errors }, 'boolean')
     expect(result.check).toBe(false)
   })
 })

@@ -1,111 +1,156 @@
 import type { CustomFullRule, FullRule, ParsedRule, ParseOptions } from './types'
 import { util } from '@aws-appsync/utils'
-import { isArray } from './utils'
+import { date, datetime, email, integer, isArray, numeric, phone, time, ulid, url, uuid } from './utils'
 
 export function parse<T>(
-  o: ParseOptions<T>,
-  r: FullRule | CustomFullRule,
+  opt: ParseOptions<T>,
+  rule: FullRule | CustomFullRule,
 ): ParsedRule<T> {
-  const [n, ...p] = typeof r === 'string'
-    ? [r, undefined]
-    : isArray(r)
-      ? [r[0], ...r.slice(1)]
-      : typeof r.rule === 'string'
-        ? [r.rule, undefined]
-        : [r.rule[0], ...r.rule.slice(1)]
+  const [n, ...p] = typeof rule === 'string'
+    ? [rule, undefined]
+    : isArray(rule)
+      ? [rule[0], ...rule.slice(1)]
+      : typeof rule.rule === 'string'
+        ? [rule.rule, undefined]
+        : [rule.rule[0], ...rule.rule.slice(1)]
 
   switch (n) {
     case 'required':
-      return requiredRule(o)
+      return requiredRule(opt)
     case 'nullable':
-      return nullableRule(o)
+      return nullableRule(opt)
     case 'sometimes':
-      return sometimesRule(o)
+      return sometimesRule(opt)
     case 'min':
-      return betweenRule(o, (p[0]! as number))
+    case 'bigger':
+      return betweenRule(opt, (p[0]! as number), undefined, n === 'bigger')
     case 'max':
-      return betweenRule(o, undefined, (p[0] as number))
+    case 'lower':
+      return betweenRule(opt, undefined, (p[0] as number), n === 'lower')
     case 'between':
-      return betweenRule(o, (p[0] as number), p[1] as number)
+    case 'within':
+      return betweenRule(opt, (p[0] as number), p[1] as number, n === 'within')
     case 'regex':
-      return regexRule(o, ...p as string[])
+      return regexRule(opt, ...p as string[])
     case 'in':
-      return inRule(o, ...p)
+      return inRule(opt, ...p)
     case 'notIn':
-      return notInRule(o, ...p)
+      return notInRule(opt, ...p)
     case 'before':
-      return beforeRule(o, p[0] as string)
-    case 'after':
-      return afterRule(o, p[0] as string)
     case 'beforeOrEqual':
-      return beforeOrEqualRule(o, p[0] as string)
+      return beforeRule(opt, p[0] as string, n === 'before')
+    case 'after':
     case 'afterOrEqual':
-      return afterOrEqualRule(o, p[0] as string)
+      return afterRule(opt, p[0] as string, n === 'after')
+    case 'email':
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.email }, email)
+    case 'phone':
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.phone }, phone)
+    case 'url':
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.url }, url)
+    case 'uuid':
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.uuid }, uuid)
+    case 'ulid':
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.ulid }, ulid)
+    case 'integer':
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.integer }, integer)
+    case 'date':
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.date }, date)
+    case 'time':
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.time }, time)
+    case 'datetime':
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.datetime }, datetime)
+    case 'numeric':
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.numeric }, numeric)
     default:
-      return typeRule(o, n)
+      return typeRule(opt, n)
   }
 }
 
-function betweenRule<T>({ value, message: m }: ParseOptions<T>, minV: number = -Infinity, maxV: number = Infinity): ParsedRule<T> {
+function betweenRule<T>(
+  { value, msg, errors }: ParseOptions<T>,
+  minV: number = -Infinity,
+  maxV: number = Infinity,
+  strict = false,
+): ParsedRule<T> {
   const [min, max] = [minV === -Infinity, maxV === Infinity]
   const result: ParsedRule<T> = {
     check: false,
-    message: m ?? min ? `:attribute should be at most ${maxV}` : max ? `:attribute should be at least ${minV}` : `:attribute must be between ${minV} and ${maxV}`,
+    msg: msg ?? min
+      ? strict
+        ? errors.biggerNumber
+        : errors.minNumber
+      : max
+        ? strict
+          ? errors.lowerNumber
+          : errors.maxNumber
+        : strict
+          ? errors.withinNumber
+          : errors.betweenNumber,
     value,
   }
   if (typeof value === 'number')
-    result.check = value >= minV && value <= maxV
+    result.check = strict ? value > minV && value < maxV : value >= minV && value <= maxV
+
   if (typeof value === 'string') {
     result.check = value.length >= minV && value.length <= maxV
-    result.message = m ?? min
-      ? `String must not exceed ${maxV} characters`
+    result.msg = msg ?? min
+      ? errors.minString
       : max
-        ? `String must contain at least ${minV} characters`
-        : `String must contain between ${minV} and ${maxV} characters`
+        ? errors.maxString
+        : errors.betweenString
   }
   if (isArray(value)) {
     result.check = value.length >= minV && value.length <= maxV
-    result.message = m ?? min
-      ? `Array must not contain more than ${maxV} elements`
+    result.msg = msg ?? min
+      ? errors.minArray
       : max
-        ? `Array must contain at least ${minV} elements`
-        : `Array must contain between ${minV} and ${maxV} elements`
+        ? errors.maxArray
+        : errors.betweenArray
   }
   return result
 }
 
-function regexRule<T>({ value, message: m }: ParseOptions<T>, ...p: string[]): ParsedRule<T> {
+function regexRule<T>({ value, msg, errors }: ParseOptions<T>, ...p: string[]): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: false,
-    message: m ?? ':attribute must match the specified regular expression',
+    msg: msg ?? (p.length === 1 ? errors.regex : errors.regex_patterns),
     value,
+    params: p.length === 1
+      ? { ':pattern': p[0]! }
+      : { ':patterns': p.join(', ') },
   }
-  if (typeof value === 'string') {
+  if (typeof value === 'string')
     result.check = p.some(pt => util.matches(pt, value))
-  }
+
+  if (typeof value === 'number')
+    result.check = p.some(pt => util.matches(pt, `${value}`))
+
   return result
 }
 
-function inRule<T>({ value, message: m }: ParseOptions<T>, ...p: unknown[]): ParsedRule<T> {
+function inRule<T>({ value, msg, errors }: ParseOptions<T>, ...p: unknown[]): ParsedRule<T> {
   return {
     check: p.includes(value),
-    message: m ?? ':attribute must be one of the specified values',
+    msg: msg ?? errors.in,
     value,
+    params: { ':in': p.join(', ') },
   }
 }
 
-function notInRule<T>({ value, message: m }: ParseOptions<T>, ...p: unknown[]): ParsedRule<T> {
+function notInRule<T>({ value, msg, errors }: ParseOptions<T>, ...p: unknown[]): ParsedRule<T> {
   return {
     check: !p.includes(value),
-    message: m ?? ':attribute must not be one of the specified values',
+    msg: msg ?? errors.notIn,
     value,
+    params: { ':notIn': p.join(', ') },
   }
 }
 
-export function requiredRule<T>({ value, message: m }: ParseOptions<T>): ParsedRule<T> {
+export function requiredRule<T>({ value, msg, errors }: ParseOptions<T>): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: true,
-    message: m ?? ':attribute is required',
+    msg: msg ?? errors.required,
     value,
     skipNext: true,
   }
@@ -118,7 +163,6 @@ export function requiredRule<T>({ value, message: m }: ParseOptions<T>): ParsedR
   if (typeof value === 'boolean')
     result.check = true
   if (typeof value === 'object' && !result.value) {
-    result.message = m ?? ':attribute is not nullable'
     result.check = false
   }
   if (typeof value === 'undefined')
@@ -127,20 +171,20 @@ export function requiredRule<T>({ value, message: m }: ParseOptions<T>): ParsedR
   return result
 }
 
-function nullableRule<T>({ value, message: m }: ParseOptions<T>): ParsedRule<T> {
+function nullableRule<T>({ value, msg, errors }: ParseOptions<T>): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: true,
-    message: m ?? ':attribute must be nullable',
+    msg: msg ?? errors.nullable,
     value,
     skipNext: typeof value === 'undefined' || value === null,
   }
   return result
 }
 
-function sometimesRule<T>({ value, message: m }: ParseOptions<T>): ParsedRule<T> {
+function sometimesRule<T>({ value, msg, errors }: ParseOptions<T>): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: true,
-    message: m ?? ':attribute is not nullable',
+    msg: msg ?? errors.sometimes,
     value,
   }
   if (typeof value === 'undefined') {
@@ -152,14 +196,15 @@ function sometimesRule<T>({ value, message: m }: ParseOptions<T>): ParsedRule<T>
     result.skipNext = true
     return result
   }
-  return requiredRule({ value, message: m })
+  return requiredRule({ value, msg, errors })
 }
 
-function typeRule<T>({ value, message: m }: ParseOptions<T>, type: 'boolean' | 'object' | 'array' | 'number' | 'string'): ParsedRule<T> {
+function typeRule<T>({ value, msg, errors }: ParseOptions<T>, type: 'boolean' | 'object' | 'array' | 'number' | 'string'): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: false,
-    message: m ?? `:attribute must be a ${type}`,
+    msg: msg ?? errors.type,
     value,
+    params: { ':type': type },
   }
   switch (type) {
     case 'array':
@@ -180,72 +225,39 @@ function typeRule<T>({ value, message: m }: ParseOptions<T>, type: 'boolean' | '
   return result
 }
 
-function beforeRule<T>({ value, message: m }: ParseOptions<T>, start: string): ParsedRule<T> {
+function beforeRule<T>({ value, msg, errors }: ParseOptions<T>, start: string, strict = false): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: false,
-    message: m ?? `:attribute must be before ${start}`,
+    msg: msg ?? errors.before,
     value,
+    params: strict
+      ? { ':before': start }
+      : { ':beforeOrEqual': start },
   }
   const startValue = util.time.parseISO8601ToEpochMilliSeconds(start)
-
-  if (typeof value === 'string') {
-    const date = util.time.parseISO8601ToEpochMilliSeconds(value)
-    result.check = date < startValue
-  }
-
-  if (typeof value === 'number') {
-    result.check = value < startValue
-  }
+  const numDate = typeof value === 'string'
+    ? util.time.parseISO8601ToEpochMilliSeconds(value)
+    : value
+  if (typeof numDate === 'number')
+    result.check = strict ? numDate < startValue : numDate <= startValue
   return result
 }
 
-function afterRule<T>({ value, message: m }: ParseOptions<T>, p: string): ParsedRule<T> {
+function afterRule<T>({ value, msg, errors }: ParseOptions<T>, p: string, strict = false): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: false,
-    message: m ?? `:attribute must be after ${p}`,
+    msg: msg ?? strict ? errors.after : errors.afterOrEqual,
     value,
+    params: strict
+      ? { ':after': p }
+      : { ':afterOrEqual': p },
   }
   const e = util.time.parseISO8601ToEpochMilliSeconds(p)
-
-  if (typeof value === 'string')
-    result.check = util.time.parseISO8601ToEpochMilliSeconds(value) > e
-
-  if (typeof value === 'number')
-    result.check = value > e
-
-  return result
-}
-
-function beforeOrEqualRule<T>({ value, message: m }: ParseOptions<T>, p: string): ParsedRule<T> {
-  const result: ParsedRule<T> = {
-    check: false,
-    message: m ?? `:attribute must be before or equal to ${p}`,
-    value,
-  }
-  const s = util.time.parseISO8601ToEpochMilliSeconds(p)
-
-  if (typeof value === 'string')
-    result.check = util.time.parseISO8601ToEpochMilliSeconds(value) <= s
-
-  if (typeof value === 'number')
-    result.check = value <= s
-
-  return result
-}
-
-function afterOrEqualRule<T>({ value, message: m }: ParseOptions<T>, p: string): ParsedRule<T> {
-  const result: ParsedRule<T> = {
-    check: false,
-    message: m ?? `:attribute must be after or equal to ${p}`,
-    value,
-  }
-  const e = util.time.parseISO8601ToEpochMilliSeconds(p)
-
-  if (typeof value === 'string')
-    result.check = util.time.parseISO8601ToEpochMilliSeconds(value) >= e
-
-  if (typeof value === 'number')
-    result.check = value >= e
+  const numDate = typeof value === 'string'
+    ? util.time.parseISO8601ToEpochMilliSeconds(value)
+    : value
+  if (typeof numDate === 'number')
+    result.check = strict ? numDate > e : numDate >= e
 
   return result
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -19,7 +20,7 @@ describe.concurrent('test arrayRule validation', () => {
     [null, undefined] as unknown[],
     [{ a: 1 }, { b: 2 }] as unknown[],
   ])('validates array values', (...value) => {
-    const result = rules.parse({ value }, 'array')
+    const result = rules.parse({ value, errors }, 'array')
     expect(result.check).toBe(true)
   })
 
@@ -32,7 +33,7 @@ describe.concurrent('test arrayRule validation', () => {
     undefined,
     { key: 'value' },
   ])('invalidates non-array values', (value) => {
-    const result = rules.parse({ value }, 'array')
+    const result = rules.parse({ value, errors }, 'array')
     expect(result.check).toBe(false)
   })
 })

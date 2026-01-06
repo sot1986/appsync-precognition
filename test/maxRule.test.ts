@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import * as rules from '../src/rules'
+import { baseErrors as errors } from '../src/utils'
 
 describe('test maxRule validation', () => {
   it.concurrent.each([
@@ -7,7 +8,7 @@ describe('test maxRule validation', () => {
     'a',
     'a'.repeat(10),
   ])('validates max length string', (value) => {
-    const result = rules.parse({ value }, ['max', 10])
+    const result = rules.parse({ value, errors }, ['max', 10])
     expect(result.check).toBe(true)
   })
 
@@ -16,7 +17,7 @@ describe('test maxRule validation', () => {
     ['a', 'b'],
     ['a', null, 3, 4],
   ])('validates max array length', (...value) => {
-    const result = rules.parse({ value }, ['max', 4])
+    const result = rules.parse({ value, errors }, ['max', 4])
     expect(result.check).toBe(true)
   })
 
@@ -25,7 +26,7 @@ describe('test maxRule validation', () => {
     5,
     0,
   ])('validates max number', (value) => {
-    const result = rules.parse({ value }, ['max', 5])
+    const result = rules.parse({ value, errors }, ['max', 5])
     expect(result.check).toBe(true)
   })
 
@@ -34,7 +35,7 @@ describe('test maxRule validation', () => {
     100,
     9.0000001,
   ])('invalidates max number', (value) => {
-    const result = rules.parse({ value }, ['max', 9])
+    const result = rules.parse({ value, errors }, ['max', 9])
     expect(result.check).toBe(false)
   })
 
@@ -42,7 +43,7 @@ describe('test maxRule validation', () => {
     'a'.repeat(11),
     'a'.repeat(100),
   ])('invalidates max length string', (value) => {
-    const result = rules.parse({ value }, ['max', 10])
+    const result = rules.parse({ value, errors }, ['max', 10])
     expect(result.check).toBe(false)
   })
 
@@ -50,7 +51,7 @@ describe('test maxRule validation', () => {
     ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
     ['a', 'b', null, 'd', 'e', 'f', 'g'],
   ])('invalidates max array length', (...value) => {
-    const result = rules.parse({ value }, ['max', 4])
+    const result = rules.parse({ value, errors }, ['max', 4])
     expect(result.check).toBe(false)
   })
 })
