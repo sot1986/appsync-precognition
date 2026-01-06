@@ -1,3 +1,11 @@
+# [0.4.0](https://github.com/sot1986/appsync-precognition/compare/v0.3.3...v0.4.0) (2026-01-06)
+
+
+### Features
+
+* handle custom baseError messages ([a7e0246](https://github.com/sot1986/appsync-precognition/commit/a7e02464b1d1607b67ea89b8352e72e8faeceaae))
+* update api to handle custom baseErrors messages ([331f3db](https://github.com/sot1986/appsync-precognition/commit/331f3db9dabb5e179e0efe2f2a11f3f3b9319852))
+
 ## [0.3.3](https://github.com/sot1986/appsync-precognition/compare/v0.3.2...v0.3.3) (2026-01-05)
 
 
