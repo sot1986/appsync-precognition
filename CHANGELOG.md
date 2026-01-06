@@ -1,3 +1,10 @@
+## [0.4.1](https://github.com/sot1986/appsync-precognition/compare/v0.4.0...v0.4.1) (2026-01-06)
+
+
+### Bug Fixes
+
+* update api to handle custom attribute names ([da56dcc](https://github.com/sot1986/appsync-precognition/commit/da56dccee7acdb098f305b13b7a7389754c74c6c))
+
 # [0.4.0](https://github.com/sot1986/appsync-precognition/compare/v0.3.3...v0.4.0) (2026-01-06)
 
 
