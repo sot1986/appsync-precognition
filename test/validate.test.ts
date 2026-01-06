@@ -160,4 +160,22 @@ describe('test validate function', () => {
       expect(error.errors).toHaveLength(1)
     }
   })
+
+  it.each([
+    'your phone',
+  ])('handles custom attribute names', (name) => {
+    try {
+      validate({ phone: 'invalid-phone' }, {
+        phone: ['required', { rule: 'phone' }],
+      }, { attributes: { ':phone': name } })
+      expect(false).toBe(true)
+    }
+    catch (error) {
+      expect(error).toBeInstanceOf(AppsyncError)
+      if (!(error instanceof AppsyncError)) {
+        throw new Error('This should not happen')
+      }
+      expect(error.message).toBe(baseErrors.phone.replace(':attr', name))
+    }
+  })
 })

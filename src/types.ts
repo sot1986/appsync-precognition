@@ -33,12 +33,10 @@ export type FullRule
     | ['afterOrEqual', string]
     | ['beforeOrEqual', string]
 
-export interface CustomFullRule<T = unknown> {
+export interface CustomFullRule {
   rule: FullRule
-  value: T
   msg?: string
   skipNext?: boolean
-  attribute?: string
 }
 
 export interface Rule<T = unknown> {
@@ -46,7 +44,6 @@ export interface Rule<T = unknown> {
   value: T
   msg?: string
   skipNext?: boolean
-  attribute?: string
 }
 
 export type ErrorMsgParams = Record<`:${string}`, string>

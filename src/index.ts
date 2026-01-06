@@ -3,21 +3,22 @@ import { runtime, util } from '@aws-appsync/utils'
 import * as rules from './rules'
 import { baseErrors, cleanString, getHeader, getNestedValue, isArray, parseErrorMessage, setNestedValue } from './utils'
 
-function isRule<T>(rule: FullRule | CustomFullRule<T> | Rule<T>): rule is Rule<T> {
+function isRule<T>(rule: FullRule | CustomFullRule | Omit<Rule<T>, 'value'>): rule is Omit<Rule<T>, 'value'> {
   return typeof rule === 'object' && !!rule && Object.hasOwn(rule, 'check')
 }
 
-function isCustomFullRule<T>(rule: FullRule | CustomFullRule<T> | Rule<T>): rule is CustomFullRule<T> {
+function isCustomFullRule<T>(rule: FullRule | CustomFullRule | Omit<Rule<T>, 'value'>): rule is CustomFullRule {
   return typeof rule === 'object' && !!rule && Object.hasOwn(rule, 'rule')
 }
 
 export function validate<T extends { [key in keyof T & string]: T[key] }>(
   obj: Partial<T>,
-  checks: Partial<Record<NestedKeyOf<T>, (FullRule | CustomFullRule<T> | Rule<T>)[]>>,
+  checks: Partial<Record<NestedKeyOf<T>, (FullRule | CustomFullRule | Omit<Rule<T>, 'value'>)[]>>,
   options?: {
     trim?: boolean
     allowEmptyString?: boolean
     errors?: Partial<ValidationErrors>
+    attributes?: Partial<Record<`:${NestedKeyOf<T>}`, string>>
   },
 ): T {
   let error: { msg?: string, errorType?: string, data?: any, errorInfo?: any } = {}
@@ -56,7 +57,7 @@ export function validate<T extends { [key in keyof T & string]: T[key] }>(
         return
 
       const result: ParsedRule<T> = isRule(rule)
-        ? { ...rule, msg: rule.msg ?? errors.invalid }
+        ? { ...rule, value, msg: rule.msg ?? errors.invalid }
         : isCustomFullRule(rule)
           ? rules.parse<T>({ value, msg: rule.msg, errors }, rule.rule)
           : rules.parse<T>({ value, errors }, rule)
@@ -71,7 +72,7 @@ export function validate<T extends { [key in keyof T & string]: T[key] }>(
 
       result.params = result.params ?? {}
       if (util.matches(':attr', result.msg))
-        result.params[':attr'] = result.params[':attr'] ?? formatAttributeName(path)
+        result.params[':attr'] = options?.attributes ? options.attributes[`:${path as NestedKeyOf<T>}`] ?? formatAttributeName(path) : formatAttributeName(path)
 
       error = {
         msg: parseErrorMessage(result.msg, result.params),
@@ -93,7 +94,7 @@ export function precognitiveValidation<
   T extends { [key in keyof T & string]: T[key] },
 >(
   ctx: { request: { headers: any }, args: Partial<T>, stash: Record<string, any> },
-  checks: Partial<Record<NestedKeyOf<T>, (FullRule | CustomFullRule<T> | Rule<T>)[]>>,
+  checks: Partial<Record<NestedKeyOf<T>, (FullRule | CustomFullRule | Rule<T>)[]>>,
   options?: {
     trim?: boolean
     allowEmptyString?: boolean
@@ -145,7 +146,13 @@ export function assertValidated<
   T extends { [key in keyof T & string]: T[key] },
 >(
   ctx: { request: { headers: any }, args: Partial<T>, stash: Record<string, any> },
-): asserts ctx is { request: { headers: any }, args: Partial<T>, stash: Record<string, any> & { __validated: T } } {
+): asserts ctx is {
+  request: {
+    headers: any
+  }
+  args: Partial<T>
+  stash: Record<string, any> & { __validated: T }
+} {
   if (Object.hasOwn(ctx.stash, '__validated'))
     return
   util.error('Context arguements have not been validated')
