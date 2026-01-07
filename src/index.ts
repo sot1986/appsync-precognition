@@ -24,25 +24,9 @@ export function validate<T extends object>(
   let error: { msg?: string, errorType?: string, data?: any, errorInfo?: any } = {}
   const errors: ValidationErrors = { ...baseErrors, ...options?.errors }
 
-  // Replace all array generic checks '*' with numbered checks
-  Object.keys(checks).forEach((path) => {
-    const keys = path.split('.')
-    keys.forEach((k, idx) => {
-      if (k !== '*' || idx === 0)
-        return
-      const parentPath = keys.slice(0, idx).join('.')
-      const parentValue = getNestedValue(obj, parentPath as NestedKeyOf<T>)
-      if (!isArray(parentValue))
-        return
-
-      parentValue.forEach((_, i) => {
-        const idxPath = [...keys]
-        idxPath[idx] = `${i}`
-        checks[idxPath.join('.') as NestedKeyOf<T>] = checks[path as NestedKeyOf<T>]
-      })
-      delete checks[path as NestedKeyOf<T>]
-    })
-  })
+  sanitizeNestedArray(obj, checks)
+  if (options?.attributes)
+    sanitizeNestedArray(obj, options.attributes)
 
   Object.keys(checks).forEach((path) => {
     let value = getNestedValue(obj, path as NestedKeyOf<T>)
@@ -71,6 +55,7 @@ export function validate<T extends object>(
         util.appendError(error.msg, error.errorType, error.data, error.errorInfo)
 
       result.params = result.params ?? {}
+
       if (util.matches(':attr', result.msg))
         result.params[':attr'] = options?.attributes?.[`:${path}`] ?? formatAttributeName(path as NestedKeyOf<T>)
 
@@ -90,6 +75,32 @@ export function validate<T extends object>(
   util.error(error.msg, error.errorType, error.data, error.errorInfo)
 }
 
+function sanitizeNestedArray<T extends object>(
+  obj: T,
+  nested: object,
+): void {
+  Object.keys(nested).forEach((path) => {
+    const keys = path.split('.')
+    keys.forEach((k, idx) => {
+      if (k !== '*' || idx === 0)
+        return
+      const parentPath = keys.slice(0, idx).join('.')
+      const parentValue = parentPath.startsWith(':')
+        ? getNestedValue(obj, parentPath.replace(':', '') as NestedKeyOf<T>)
+        : getNestedValue(obj, parentPath as NestedKeyOf<T>)
+      if (!isArray(parentValue))
+        return
+
+      parentValue.forEach((_, i) => {
+        const idxPath = [...keys]
+        idxPath[idx] = `${i}`
+        nested[idxPath.join('.') as keyof typeof nested] = nested[path as keyof typeof nested]
+      })
+      delete nested[path as keyof typeof nested]
+    })
+  })
+}
+
 export function precognitiveValidation<
   T extends object,
 >(
@@ -103,7 +114,7 @@ export function precognitiveValidation<
     attributes?: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
   },
 ): T {
-  const { errors, attributes } = isLocalized(ctx)
+  const { errors, attributes } = (isLocalized(ctx)
     ? {
         errors: {
           ...ctx.stash.__i18n.errors,
@@ -113,14 +124,11 @@ export function precognitiveValidation<
           ...ctx.stash.__i18n.attributes,
           ...options?.attributes,
         },
-      } as {
-        errors: DefinedRecord<Partial<ValidationErrors>>
-        attributes: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
       }
-    : { errors: options?.errors, attributes: options?.attributes } as {
-        errors: DefinedRecord<Partial<ValidationErrors>>
-        attributes: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
-      }
+    : { errors: options?.errors, attributes: options?.attributes }) as {
+    errors: DefinedRecord<Partial<ValidationErrors>>
+    attributes: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
+  }
   if (getHeader('precognition', ctx) !== 'true') {
     ctx.stash.__validated = validate<T>(
       ctx.args,
@@ -176,16 +184,23 @@ export function assertValidated<T extends object>(
   util.error('Context arguements have not been validated')
 }
 
-export function isLocalized<T extends object>(
+export function isLocalized<T extends object, TLocale extends string>(
   ctx: Ctx<T>,
-): ctx is LocalizedCtx<T> {
-  return Object.hasOwn(ctx.stash, '__i18n') && typeof ctx.stash?.__i18n.locale === 'string'
+  locale?: TLocale,
+): ctx is LocalizedCtx<T, TLocale> {
+  if (Object.hasOwn(ctx.stash, '__i18n') && typeof ctx.stash?.__i18n.locale === 'string') {
+    return locale
+      ? ctx.stash.__i18n.locale === locale
+      : true
+  }
+  return false
 }
 
-export function assertLocalized<T extends object>(
+export function assertLocalized<T extends object, TLocale extends string>(
   ctx: Ctx<T>,
-): asserts ctx is LocalizedCtx<T> {
-  if (isLocalized(ctx))
+  locale?: TLocale,
+): asserts ctx is LocalizedCtx<T, TLocale> {
+  if (isLocalized(ctx, locale))
     return
   util.error('Context arguements have not been localized')
 }

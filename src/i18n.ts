@@ -1,16 +1,15 @@
-import type { DefinedRecord, NestedKeyOf, ValidationErrors } from './types'
+import type { Ctx, DefinedRecord, LocalizedCtx, NestedKeyOf, ValidationErrors } from './types'
 import { getHeader } from './utils'
 
 export function localize<
-  TLocales extends string[],
   T extends object,
 >(
-  ctx: { args?: Partial<T>, request: { headers: any }, stash: Record<string, any> },
+  ctx: Ctx<T>,
   i18n?: {
-    errors?: Record<TLocales[number], DefinedRecord<Partial<ValidationErrors>>>
-    attributes?: Record<TLocales[number], DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>>
+    errors?: Record<string, DefinedRecord<Partial<ValidationErrors>>>
+    attributes?: Record<string, DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>>
   },
-): void {
+): asserts ctx is Ctx<T> & LocalizedCtx<T, string> {
   const locale = getHeader('Accepted-Language', ctx)
   if (locale) {
     ctx.stash.__i18n = {
@@ -22,5 +21,11 @@ export function localize<
         ? i18n.attributes[locale as keyof typeof i18n.attributes]
         : undefined,
     }
+    return
+  }
+  ctx.stash.__i18n = {
+    locale: 'en',
+    errors: i18n?.errors?.en,
+    attributes: i18n?.attributes?.en,
   }
 }

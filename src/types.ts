@@ -143,6 +143,18 @@ export interface Ctx<T extends object> {
   stash: Record<string, any>
 }
 
+export interface I18n<T extends object, TLocale extends string> {
+  locale: TLocale
+  errors?: Record<string, DefinedRecord<Partial<ValidationErrors>>>
+  attributes?: Record<string, DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>>
+}
+
+export type LocalizedCtx<T extends object, TLocale extends string> = Ctx<T> & {
+  stash: {
+    __i18n: I18n<T, TLocale>
+  }
+}
+
 type ArrayKeys<T extends unknown[]>
   = T extends [unknown, ...unknown[]]
     ? T extends Record<infer Index, unknown>
@@ -173,18 +185,8 @@ export type NestedKeyOf<T> = T extends Record<infer Key, unknown>
               ? T extends [unknown, ...unknown[]]
                 ? never
                 : T[number] extends object
-                  ? `${number}.${NestedKeyOf<T[number]>}`
+                  ? `${number}.${NestedKeyOf<T[number]>}` | `*.${NestedKeyOf<T[number]>}`
                   : never
               : never))
         : never
   : never
-
-export type LocalizedCtx<T extends object> = Ctx<T> & {
-  stash: {
-    __i18n: {
-      locale: string
-      errors?: DefinedRecord<Partial<ValidationErrors>>
-      attributes?: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
-    }
-  }
-}
