@@ -1,3 +1,10 @@
+## [0.5.3](https://github.com/sot1986/appsync-precognition/compare/v0.5.2...v0.5.3) (2026-01-07)
+
+
+### Bug Fixes
+
+* update Readme.md with minimal validation ([2e2a431](https://github.com/sot1986/appsync-precognition/commit/2e2a43115b7c1696222e15cf2b5c1de98bcf0f8f))
+
 ## [0.5.2](https://github.com/sot1986/appsync-precognition/compare/v0.5.1...v0.5.2) (2026-01-07)
 
 
