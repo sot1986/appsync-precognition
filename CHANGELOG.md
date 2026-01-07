@@ -1,3 +1,11 @@
+# [0.5.0](https://github.com/sot1986/appsync-precognition/compare/v0.4.1...v0.5.0) (2026-01-07)
+
+
+### Features
+
+* add localization for errors and attributes ([35b15de](https://github.com/sot1986/appsync-precognition/commit/35b15dec64dab4dd90c1612546cee6d831e95ce4))
+* Merge branch 'main' of github.com:sot1986/appsync-precognition ([4e143d0](https://github.com/sot1986/appsync-precognition/commit/4e143d02304ac9131e096244673d1b2f8d686231))
+
 ## [0.4.1](https://github.com/sot1986/appsync-precognition/compare/v0.4.0...v0.4.1) (2026-01-06)
 
 
