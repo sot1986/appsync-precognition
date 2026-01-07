@@ -1,3 +1,10 @@
+## [0.5.2](https://github.com/sot1986/appsync-precognition/compare/v0.5.1...v0.5.2) (2026-01-07)
+
+
+### Bug Fixes
+
+* remove dist files from git tree ([9996f9e](https://github.com/sot1986/appsync-precognition/commit/9996f9e1ae74c3316cf58148d75735bcc8eff709))
+
 ## [0.5.1](https://github.com/sot1986/appsync-precognition/compare/v0.5.0...v0.5.1) (2026-01-07)
 
 
