@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: './src/index.ts',
     utils: './src/utils.ts',
+    i18n: './src/i18n.ts',
   },
   dts: {
     sourcemap: true,

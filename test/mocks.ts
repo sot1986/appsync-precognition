@@ -89,3 +89,9 @@ export function mockRuntime() {
     earlyReturn,
   }
 }
+
+export function assertAppsyncError(error: unknown): asserts error is AppsyncError {
+  if (error instanceof AppsyncError)
+    return
+  throw new Error('Expected AppsynError')
+}

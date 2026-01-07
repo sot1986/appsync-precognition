@@ -165,7 +165,7 @@ describe('test validate function', () => {
     'your phone',
   ])('handles custom attribute names', (name) => {
     try {
-      validate({ phone: 'invalid-phone' }, {
+      validate({ phone: 'invalid-phone', name: 'Marco' }, {
         phone: ['required', { rule: 'phone' }],
       }, { attributes: { ':phone': name } })
       expect(false).toBe(true)

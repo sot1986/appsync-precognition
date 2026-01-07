@@ -73,7 +73,7 @@ function betweenRule<T>(
   maxV: number = Infinity,
   strict = false,
 ): ParsedRule<T> {
-  const [min, max] = [minV === -Infinity, maxV === Infinity]
+  const [min, max] = [maxV === Infinity, minV === -Infinity]
   const result: ParsedRule<T> = {
     check: false,
     msg: msg ?? min
@@ -88,6 +88,10 @@ function betweenRule<T>(
           ? errors.withinNumber
           : errors.betweenNumber,
     value,
+    params: {
+      ':min': `${minV}`,
+      ':max': `${maxV}`,
+    },
   }
   if (typeof value === 'number')
     result.check = strict ? value > minV && value < maxV : value >= minV && value <= maxV

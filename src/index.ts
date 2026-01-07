@@ -1,4 +1,4 @@
-import type { CustomFullRule, FullRule, NestedKeyOf, ParsedRule, Rule, ValidationErrors } from './types'
+import type { Ctx, CustomFullRule, DefinedRecord, FullRule, LocalizedCtx, NestedKeyOf, ParsedRule, Rule, ValidationErrors } from './types'
 import { runtime, util } from '@aws-appsync/utils'
 import * as rules from './rules'
 import { baseErrors, cleanString, getHeader, getNestedValue, isArray, parseErrorMessage, setNestedValue } from './utils'
@@ -11,18 +11,18 @@ function isCustomFullRule<T>(rule: FullRule | CustomFullRule | Omit<Rule<T>, 'va
   return typeof rule === 'object' && !!rule && Object.hasOwn(rule, 'rule')
 }
 
-export function validate<T extends { [key in keyof T & string]: T[key] }>(
+export function validate<T extends object>(
   obj: Partial<T>,
   checks: Partial<Record<NestedKeyOf<T>, (FullRule | CustomFullRule | Omit<Rule<T>, 'value'>)[]>>,
   options?: {
     trim?: boolean
     allowEmptyString?: boolean
-    errors?: Partial<ValidationErrors>
-    attributes?: Partial<Record<`:${NestedKeyOf<T>}`, string>>
+    errors?: DefinedRecord<Partial<ValidationErrors>>
+    attributes?: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
   },
 ): T {
   let error: { msg?: string, errorType?: string, data?: any, errorInfo?: any } = {}
-  const errors = { ...baseErrors, ...options?.errors }
+  const errors: ValidationErrors = { ...baseErrors, ...options?.errors }
 
   // Replace all array generic checks '*' with numbered checks
   Object.keys(checks).forEach((path) => {
@@ -72,7 +72,7 @@ export function validate<T extends { [key in keyof T & string]: T[key] }>(
 
       result.params = result.params ?? {}
       if (util.matches(':attr', result.msg))
-        result.params[':attr'] = options?.attributes ? options.attributes[`:${path as NestedKeyOf<T>}`] ?? formatAttributeName(path) : formatAttributeName(path)
+        result.params[':attr'] = options?.attributes?.[`:${path}`] ?? formatAttributeName(path as NestedKeyOf<T>)
 
       error = {
         msg: parseErrorMessage(result.msg, result.params),
@@ -91,18 +91,42 @@ export function validate<T extends { [key in keyof T & string]: T[key] }>(
 }
 
 export function precognitiveValidation<
-  T extends { [key in keyof T & string]: T[key] },
+  T extends object,
 >(
-  ctx: { request: { headers: any }, args: Partial<T>, stash: Record<string, any> },
+  ctx: Ctx<T>,
   checks: Partial<Record<NestedKeyOf<T>, (FullRule | CustomFullRule | Rule<T>)[]>>,
   options?: {
     trim?: boolean
     allowEmptyString?: boolean
     skipTo?: 'END' | 'NEXT'
+    errors?: DefinedRecord<Partial<ValidationErrors>>
+    attributes?: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
   },
 ): T {
+  const { errors, attributes } = isLocalized(ctx)
+    ? {
+        errors: {
+          ...ctx.stash.__i18n.errors,
+          ...options?.errors,
+        },
+        attributes: {
+          ...ctx.stash.__i18n.attributes,
+          ...options?.attributes,
+        },
+      } as {
+        errors: DefinedRecord<Partial<ValidationErrors>>
+        attributes: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
+      }
+    : { errors: options?.errors, attributes: options?.attributes } as {
+        errors: DefinedRecord<Partial<ValidationErrors>>
+        attributes: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
+      }
   if (getHeader('precognition', ctx) !== 'true') {
-    ctx.stash.__validated = validate<T>(ctx.args, checks, options)
+    ctx.stash.__validated = validate<T>(
+      ctx.args,
+      checks,
+      { ...options, errors, attributes },
+    )
     return ctx.stash.__validated
   }
 
@@ -110,7 +134,7 @@ export function precognitiveValidation<
   util.http.addResponseHeader('Precognition', 'true')
 
   if (!validationKeys) {
-    ctx.stash.__validated = validate(ctx.args, checks, options)
+    ctx.stash.__validated = validate(ctx.args, checks, { ...options, errors, attributes })
     util.http.addResponseHeader('Precognition-Success', 'true')
     runtime.earlyReturn(null)
   }
@@ -121,7 +145,7 @@ export function precognitiveValidation<
     precognitionChecks[key as NestedKeyOf<T>] = checks[key as NestedKeyOf<T>]
   })
 
-  ctx.stash.__validated = validate(ctx.args, precognitionChecks, options)
+  ctx.stash.__validated = validate(ctx.args, precognitionChecks, { ...options, errors, attributes })
   util.http.addResponseHeader('Precognition-Success', 'true')
   runtime.earlyReturn(null, { skipTo: options?.skipTo ?? 'END' })
 }
@@ -142,18 +166,26 @@ export function formatAttributeName(path: string): string {
   }, '')
 }
 
-export function assertValidated<
-  T extends { [key in keyof T & string]: T[key] },
->(
-  ctx: { request: { headers: any }, args: Partial<T>, stash: Record<string, any> },
-): asserts ctx is {
-  request: {
-    headers: any
-  }
-  args: Partial<T>
-  stash: Record<string, any> & { __validated: T }
+export function assertValidated<T extends object>(
+  ctx: Ctx<T>,
+): asserts ctx is Ctx<T> & {
+  stash: { __validated: T }
 } {
   if (Object.hasOwn(ctx.stash, '__validated'))
     return
   util.error('Context arguements have not been validated')
+}
+
+export function isLocalized<T extends object>(
+  ctx: Ctx<T>,
+): ctx is LocalizedCtx<T> {
+  return Object.hasOwn(ctx.stash, '__i18n') && typeof ctx.stash?.__i18n.locale === 'string'
+}
+
+export function assertLocalized<T extends object>(
+  ctx: Ctx<T>,
+): asserts ctx is LocalizedCtx<T> {
+  if (isLocalized(ctx))
+    return
+  util.error('Context arguements have not been localized')
 }

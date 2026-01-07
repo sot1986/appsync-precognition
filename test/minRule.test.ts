@@ -42,6 +42,7 @@ describe.concurrent('test minRule validation', () => {
   it.concurrent.each([
     2,
     2.0,
+    3,
   ])('validates min number', (value) => {
     const result = rules.parse({ value, errors }, ['min', 2])
     expect(result.check).toBe(true)
@@ -51,7 +52,8 @@ describe.concurrent('test minRule validation', () => {
     1,
     0,
     -5,
-  ])('invalidates min length number', (value) => {
+    1.9999,
+  ])('invalidates min value number', (value) => {
     const result = rules.parse({ value, errors }, ['min', 2])
     expect(result.check).toBe(false)
   })
