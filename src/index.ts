@@ -129,14 +129,8 @@ export function precognitiveValidation<
     errors: DefinedRecord<Partial<ValidationErrors>>
     attributes: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
   }
-  if (getHeader('precognition', ctx) !== 'true') {
-    ctx.stash.__validated = validate<T>(
-      ctx.args,
-      checks,
-      { ...options, errors, attributes },
-    )
-    return ctx.stash.__validated
-  }
+  if (getHeader('precognition', ctx) !== 'true')
+    return ctx.stash.__validated = validate<T>(ctx.args, checks, { ...options, errors, attributes })
 
   const validationKeys = getHeader('Precognition-Validate-Only', ctx)?.split(',').map(key => key.trim())
   util.http.addResponseHeader('Precognition', 'true')
@@ -156,6 +150,7 @@ export function precognitiveValidation<
   ctx.stash.__validated = validate(ctx.args, precognitionChecks, { ...options, errors, attributes })
   util.http.addResponseHeader('Precognition-Success', 'true')
   runtime.earlyReturn(null, { skipTo: options?.skipTo ?? 'END' })
+  return ctx.stash.__validated
 }
 
 export function formatAttributeName(path: string): string {
