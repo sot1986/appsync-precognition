@@ -1,3 +1,10 @@
+## [0.5.1](https://github.com/sot1986/appsync-precognition/compare/v0.5.0...v0.5.1) (2026-01-07)
+
+
+### Bug Fixes
+
+* add translation for array attributes ([5e4397e](https://github.com/sot1986/appsync-precognition/commit/5e4397e4f5bc7418a7c8f7d6161191e0b7080643))
+
 # [0.5.0](https://github.com/sot1986/appsync-precognition/compare/v0.4.1...v0.5.0) (2026-01-07)
 
 
