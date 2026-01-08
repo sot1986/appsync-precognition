@@ -1,3 +1,10 @@
+## [0.5.5](https://github.com/sot1986/appsync-precognition/compare/v0.5.4...v0.5.5) (2026-01-08)
+
+
+### Bug Fixes
+
+* remove DefineRecord helper ([746d857](https://github.com/sot1986/appsync-precognition/commit/746d8577846549e4870bd74287f5dacd421bbaa4))
+
 ## [0.5.4](https://github.com/sot1986/appsync-precognition/compare/v0.5.3...v0.5.4) (2026-01-08)
 
 
