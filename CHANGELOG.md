@@ -1,3 +1,10 @@
+## [0.5.4](https://github.com/sot1986/appsync-precognition/compare/v0.5.3...v0.5.4) (2026-01-08)
+
+
+### Bug Fixes
+
+* update index.ts to update needed types ([20f2df0](https://github.com/sot1986/appsync-precognition/commit/20f2df0918a8d035979351bc505a7307727974d0))
+
 ## [0.5.3](https://github.com/sot1986/appsync-precognition/compare/v0.5.2...v0.5.3) (2026-01-07)
 
 
