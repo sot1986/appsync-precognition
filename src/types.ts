@@ -1,7 +1,5 @@
 export {}
 
-export type DefinedRecord<T extends Partial<Record<string, any>>> = T & Record<string, string>
-
 export type FullRule
   = 'required'
     | 'nullable'
@@ -145,8 +143,8 @@ export interface Ctx<T extends object> {
 
 export interface I18n<T extends object, TLocale extends string> {
   locale: TLocale
-  errors?: Record<string, DefinedRecord<Partial<ValidationErrors>>>
-  attributes?: Record<string, DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>>
+  errors?: Record<string, Partial<ValidationErrors>>
+  attributes?: Record<string, Partial<Record<`:${NestedKeyOf<T>}`, string>>>
 }
 
 export type LocalizedCtx<T extends object, TLocale extends string> = Ctx<T> & {

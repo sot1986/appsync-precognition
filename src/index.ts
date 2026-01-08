@@ -1,4 +1,4 @@
-import type { Ctx, CustomFullRule, DefinedRecord, FullRule, LocalizedCtx, NestedKeyOf, ParsedRule, Rule, ValidationErrors } from './types'
+import type { Ctx, CustomFullRule, FullRule, LocalizedCtx, NestedKeyOf, ParsedRule, Rule, ValidationErrors } from './types'
 import { runtime, util } from '@aws-appsync/utils'
 import * as rules from './rules'
 import { baseErrors, cleanString, getHeader, getNestedValue, isArray, parseErrorMessage, setNestedValue } from './utils'
@@ -17,8 +17,8 @@ export function validate<T extends object>(
   options?: {
     trim?: boolean
     allowEmptyString?: boolean
-    errors?: DefinedRecord<Partial<ValidationErrors>>
-    attributes?: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
+    errors?: Partial<ValidationErrors>
+    attributes?: Partial<Record<`:${NestedKeyOf<T>}`, string>>
   },
 ): T {
   let error: { msg?: string, errorType?: string, data?: any, errorInfo?: any } = {}
@@ -57,7 +57,7 @@ export function validate<T extends object>(
       result.params = result.params ?? {}
 
       if (util.matches(':attr', result.msg))
-        result.params[':attr'] = options?.attributes?.[`:${path}`] ?? formatAttributeName(path as NestedKeyOf<T>)
+        result.params[':attr'] = options?.attributes?.[`:${path as NestedKeyOf<T>}`] ?? formatAttributeName(path as NestedKeyOf<T>)
 
       error = {
         msg: parseErrorMessage(result.msg, result.params),
@@ -110,8 +110,8 @@ export function precognitiveValidation<
     trim?: boolean
     allowEmptyString?: boolean
     skipTo?: 'END' | 'NEXT'
-    errors?: DefinedRecord<Partial<ValidationErrors>>
-    attributes?: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
+    errors?: Partial<ValidationErrors>
+    attributes?: Partial<Record<`:${NestedKeyOf<T>}`, string>>
   },
 ): T {
   const { errors, attributes } = (isLocalized(ctx)
@@ -126,8 +126,8 @@ export function precognitiveValidation<
         },
       }
     : { errors: options?.errors, attributes: options?.attributes }) as {
-    errors: DefinedRecord<Partial<ValidationErrors>>
-    attributes: DefinedRecord<Partial<Record<`:${NestedKeyOf<T>}`, string>>>
+    errors: Partial<ValidationErrors>
+    attributes: Partial<Record<`:${NestedKeyOf<T>}`, string>>
   }
   if (getHeader('precognition', ctx) !== 'true')
     return ctx.stash.__validated = validate<T>(ctx.args, checks, { ...options, errors, attributes })
