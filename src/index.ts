@@ -181,10 +181,9 @@ export function formatAttributeName(path: string): string {
 
 export function assertValidated<
   T extends { [key in keyof T]: T[key] },
-  TCtx extends Ctx<Partial<T>> = Ctx<Partial<T>>,
 >(
-  ctx: TCtx,
-): asserts ctx is TCtx & {
+  ctx: Ctx<Partial<T>>,
+): asserts ctx is typeof ctx & {
   stash: { __validated: T }
 } {
   if (Object.hasOwn(ctx.stash, '__validated'))

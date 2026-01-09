@@ -22,6 +22,10 @@ describe.concurrent('test precognitiveValidation function', () => {
     })
 
     expect(result).toEqual({ name: 'Marco', age: 25 })
+
+    assertValidated(ctx)
+
+    expect(ctx.stash.__validated).toEqual({ name: 'Marco', age: 25 })
   })
 
   it('validates all fields and early returns when precognitive without validate-only header', () => {
