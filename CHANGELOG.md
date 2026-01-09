@@ -1,3 +1,10 @@
+## [0.5.9](https://github.com/sot1986/appsync-precognition/compare/v0.5.8...v0.5.9) (2026-01-09)
+
+
+### Bug Fixes
+
+* add testing for assertValidated ([a32f026](https://github.com/sot1986/appsync-precognition/commit/a32f026dfaa900a3768766b22dd11a7461c9245f))
+
 ## [0.5.8](https://github.com/sot1986/appsync-precognition/compare/v0.5.7...v0.5.8) (2026-01-09)
 
 
