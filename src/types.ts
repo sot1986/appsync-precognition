@@ -2,8 +2,8 @@ export {}
 
 export type FullRule
   = 'required'
-    | 'nullable'
     | 'sometimes'
+    | 'nullable'
     | 'number'
     | 'boolean'
     | 'string'
@@ -36,7 +36,6 @@ export type FullRule
 export interface CustomFullRule {
   rule: FullRule
   msg?: string
-  skipNext?: boolean
 }
 
 export interface Rule<T = unknown> {
@@ -176,6 +175,33 @@ export type NestedKeyOf<T> = T extends Record<infer Key, unknown>
               : never))
         : never
   : never
+
+// export type TypeOfNestedKey<T, K extends NestedKeyOf<T>>
+//   = K extends keyof T
+//     ? T[K]
+//     : K extends `${infer Key}.${infer Rest}`
+//       ? Key extends keyof T
+//         ? Rest extends NestedKeyOf<T[Key]>
+//           ? TypeOfNestedKey<T[Key], Rest>
+//           : never
+//         : Key extends `${number}`
+//           ? T extends readonly unknown[]
+//             ? Rest extends NestedKeyOf<T[number]>
+//               ? TypeOfNestedKey<T[number], Rest>
+//               : never
+//             : never
+//           : Key extends '*'
+//             ? T extends readonly (infer U)[]
+//               ? Rest extends NestedKeyOf<U>
+//                 ? TypeOfNestedKey<U, Rest>
+//                 : never
+//               : never
+//             : never
+//       : K extends '*'
+//         ? T extends readonly (infer U)[]
+//           ? U
+//           : never
+//         : never
 
 export interface Ctx<
   T extends { [key in keyof T]: T[key] },

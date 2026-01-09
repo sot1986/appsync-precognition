@@ -99,7 +99,7 @@ describe('test validate function', () => {
       name: 'Marco',
       age: 25,
       phone: '+393331234567',
-      email: 'marco@example.com',
+      email: 'marco@example.com' as string | null,
     },
   ])('passes with nullable field having valid value', (data) => {
     const result = validate(data, {
@@ -115,7 +115,7 @@ describe('test validate function', () => {
     {
       name: 'Marco',
       age: 25,
-      phone: 'invalid-phone',
+      phone: 'invalid-phone' as string | null,
       email: 'marco@example.com',
     },
   ])('fails with nullable field having invalid value', (data) => {
