@@ -1,4 +1,4 @@
-import type { Ctx, CustomFullRule, FullRule, LocalizedCtx, NestedKeyOf, ParsedRule, Rule, ValidationErrors } from './types'
+import type { Ctx, CustomFullRule, FullRule, I18n, NestedKeyOf, ParsedRule, Rule, ValidationErrors } from './types'
 import { runtime, util } from '@aws-appsync/utils'
 import * as rules from './rules'
 import { baseErrors, cleanString, getHeader, getNestedValue, isArray, parseErrorMessage, setNestedValue } from './utils'
@@ -85,9 +85,11 @@ function sanitizeNestedArray(
       if (k !== '*' || idx === 0)
         return
       const parentPath = keys.slice(0, idx).join('.')
-      const parentValue = parentPath.startsWith(':')
-        ? getNestedValue(obj, parentPath.replace(':', ''))
-        : getNestedValue(obj, parentPath)
+      const parentValue = getNestedValue(
+        obj,
+        parentPath.startsWith(':') ? parentPath.slice(1) : parentPath,
+      )
+
       if (!isArray(parentValue))
         return
 
@@ -187,7 +189,11 @@ export function isLocalized<
 >(
   ctx: TCtx,
   locale?: TLocale,
-): ctx is LocalizedCtx<T, TLocale, TCtx> {
+): ctx is typeof ctx & {
+  stash: typeof ctx.stash & {
+    __i18n: I18n<T, string>
+  }
+} {
   if (Object.hasOwn(ctx.stash, '__i18n') && typeof ctx.stash?.__i18n.locale === 'string') {
     return locale
       ? ctx.stash.__i18n.locale === locale
@@ -203,10 +209,14 @@ export function assertLocalized<
 >(
   ctx: TCtx,
   locale?: TLocale,
-): asserts ctx is LocalizedCtx<T, TLocale, TCtx> {
+): asserts ctx is typeof ctx & {
+  stash: typeof ctx.stash & {
+    __i18n: I18n<T, string>
+  }
+} {
   if (isLocalized<T, TLocale, TCtx>(ctx, locale))
     return
   util.error('Context arguements have not been localized')
 }
 
-export type { CustomFullRule, FullRule, LocalizedCtx, Rule, ValidationErrors } from './types'
+export type { CustomFullRule, FullRule, I18n, Rule, ValidationErrors } from './types'

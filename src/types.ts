@@ -141,16 +141,6 @@ export interface I18n<T extends { [key in keyof T]: T[key] }, TLocale extends st
   attributes?: Record<string, Partial<Record<`:${NestedKeyOf<T>}`, string>>>
 }
 
-export type LocalizedCtx<
-  T extends { [key in keyof T]: T[key] },
-  TLocale extends string,
-  TCtx extends Ctx<Partial<T>> = Ctx<Partial<T>>,
-> = TCtx & {
-  stash: {
-    __i18n: I18n<T, TLocale>
-  }
-}
-
 type ArrayKeys<T extends unknown[]>
   = T extends [unknown, ...unknown[]]
     ? T extends Record<infer Index, unknown>

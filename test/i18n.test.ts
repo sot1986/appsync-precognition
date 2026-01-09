@@ -1,4 +1,3 @@
-import type { Ctx } from '../src/types'
 import { describe, expect, it, vi } from 'vitest'
 import { assertLocalized, precognitiveValidation } from '../src'
 import { localize } from '../src/i18n'
