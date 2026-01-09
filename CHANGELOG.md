@@ -1,3 +1,11 @@
+## [0.5.7](https://github.com/sot1986/appsync-precognition/compare/v0.5.6...v0.5.7) (2026-01-09)
+
+
+### Bug Fixes
+
+* Merge branch 'main' of github.com:sot1986/appsync-precognition ([46a6e6e](https://github.com/sot1986/appsync-precognition/commit/46a6e6e9802739472bdc843ad14a291f4bc2db42))
+* redefine types for localize function ([e99360c](https://github.com/sot1986/appsync-precognition/commit/e99360cbc070148ab56eb696fb34dc5ea3f7b69d))
+
 ## [0.5.6](https://github.com/sot1986/appsync-precognition/compare/v0.5.5...v0.5.6) (2026-01-09)
 
 
