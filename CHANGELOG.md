@@ -1,3 +1,10 @@
+## [0.5.6](https://github.com/sot1986/appsync-precognition/compare/v0.5.5...v0.5.6) (2026-01-09)
+
+
+### Bug Fixes
+
+* update generics ([525004e](https://github.com/sot1986/appsync-precognition/commit/525004e64cf9ba0acbbaf1c8a71d9217cdc86525))
+
 ## [0.5.5](https://github.com/sot1986/appsync-precognition/compare/v0.5.4...v0.5.5) (2026-01-08)
 
 
