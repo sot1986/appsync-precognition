@@ -1,3 +1,10 @@
+## [0.5.8](https://github.com/sot1986/appsync-precognition/compare/v0.5.7...v0.5.8) (2026-01-09)
+
+
+### Bug Fixes
+
+* prevent updating context args ([c358bce](https://github.com/sot1986/appsync-precognition/commit/c358bce8115753b1d60843897749cb267b806630))
+
 ## [0.5.7](https://github.com/sot1986/appsync-precognition/compare/v0.5.6...v0.5.7) (2026-01-09)
 
 
