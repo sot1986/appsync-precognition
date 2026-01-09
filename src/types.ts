@@ -135,19 +135,17 @@ export interface ParseOptions<T> {
   errors: ValidationErrors
 }
 
-export interface Ctx<T extends object> {
-  request: { headers: any }
-  args: T
-  stash: Record<string, any>
-}
-
-export interface I18n<T extends object, TLocale extends string> {
+export interface I18n<T extends { [key in keyof T]: T[key] }, TLocale extends string> {
   locale: TLocale
   errors?: Record<string, Partial<ValidationErrors>>
   attributes?: Record<string, Partial<Record<`:${NestedKeyOf<T>}`, string>>>
 }
 
-export type LocalizedCtx<T extends object, TLocale extends string> = Ctx<T> & {
+export type LocalizedCtx<
+  T extends { [key in keyof T]: T[key] },
+  TLocale extends string,
+  TCtx extends Ctx<Partial<T>> = Ctx<Partial<T>>,
+> = TCtx & {
   stash: {
     __i18n: I18n<T, TLocale>
   }
@@ -188,3 +186,14 @@ export type NestedKeyOf<T> = T extends Record<infer Key, unknown>
               : never))
         : never
   : never
+
+export interface Ctx<
+  T extends { [key in keyof T]: T[key] },
+> {
+  args: T
+  arguments: T
+  stash: Record<string, any>
+  request: {
+    headers: Record<string, string>
+  }
+}

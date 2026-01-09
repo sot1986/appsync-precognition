@@ -11,7 +11,7 @@ function isCustomFullRule<T>(rule: FullRule | CustomFullRule | Omit<Rule<T>, 'va
   return typeof rule === 'object' && !!rule && Object.hasOwn(rule, 'rule')
 }
 
-export function validate<T extends object>(
+export function validate<T extends { [key in keyof T & string]: T[key] }>(
   obj: Partial<T>,
   checks: Partial<Record<NestedKeyOf<T>, (FullRule | CustomFullRule | Omit<Rule<T>, 'value'>)[]>>,
   options?: {
@@ -75,8 +75,8 @@ export function validate<T extends object>(
   util.error(error.msg, error.errorType, error.data, error.errorInfo)
 }
 
-function sanitizeNestedArray<T extends object>(
-  obj: T,
+function sanitizeNestedArray(
+  obj: object,
   nested: object,
 ): void {
   Object.keys(nested).forEach((path) => {
@@ -86,8 +86,8 @@ function sanitizeNestedArray<T extends object>(
         return
       const parentPath = keys.slice(0, idx).join('.')
       const parentValue = parentPath.startsWith(':')
-        ? getNestedValue(obj, parentPath.replace(':', '') as NestedKeyOf<T>)
-        : getNestedValue(obj, parentPath as NestedKeyOf<T>)
+        ? getNestedValue(obj, parentPath.replace(':', ''))
+        : getNestedValue(obj, parentPath)
       if (!isArray(parentValue))
         return
 
@@ -101,10 +101,8 @@ function sanitizeNestedArray<T extends object>(
   })
 }
 
-export function precognitiveValidation<
-  T extends object,
->(
-  ctx: Ctx<T>,
+export function precognitiveValidation<T extends { [key in keyof T & string]: T[key] }>(
+  ctx: Ctx<Partial<T>>,
   checks: Partial<Record<NestedKeyOf<T>, (FullRule | CustomFullRule | Rule<T>)[]>>,
   options?: {
     trim?: boolean
@@ -169,20 +167,27 @@ export function formatAttributeName(path: string): string {
   }, '')
 }
 
-export function assertValidated<T extends object>(
-  ctx: Ctx<T>,
-): asserts ctx is Ctx<T> & {
+export function assertValidated<
+  T extends { [key in keyof T]: T[key] },
+  TCtx extends Ctx<Partial<T>> = Ctx<Partial<T>>,
+>(
+  ctx: TCtx,
+): asserts ctx is TCtx & {
   stash: { __validated: T }
 } {
   if (Object.hasOwn(ctx.stash, '__validated'))
     return
-  util.error('Context arguements have not been validated')
+  util.error('Context arguments have not been validated')
 }
 
-export function isLocalized<T extends object, TLocale extends string>(
-  ctx: Ctx<T>,
+export function isLocalized<
+  T extends { [key in keyof T]: T[key] },
+  TLocale extends string,
+  TCtx extends Ctx<Partial<T>> = Ctx<Partial<T>>,
+>(
+  ctx: TCtx,
   locale?: TLocale,
-): ctx is LocalizedCtx<T, TLocale> {
+): ctx is LocalizedCtx<T, TLocale, TCtx> {
   if (Object.hasOwn(ctx.stash, '__i18n') && typeof ctx.stash?.__i18n.locale === 'string') {
     return locale
       ? ctx.stash.__i18n.locale === locale
@@ -191,11 +196,15 @@ export function isLocalized<T extends object, TLocale extends string>(
   return false
 }
 
-export function assertLocalized<T extends object, TLocale extends string>(
-  ctx: Ctx<T>,
+export function assertLocalized<
+  T extends { [key in keyof T]: T[key] },
+  TLocale extends string,
+  TCtx extends Ctx<Partial<T>> = Ctx<Partial<T>>,
+>(
+  ctx: TCtx,
   locale?: TLocale,
-): asserts ctx is LocalizedCtx<T, TLocale> {
-  if (isLocalized(ctx, locale))
+): asserts ctx is LocalizedCtx<T, TLocale, TCtx> {
+  if (isLocalized<T, TLocale, TCtx>(ctx, locale))
     return
   util.error('Context arguements have not been localized')
 }

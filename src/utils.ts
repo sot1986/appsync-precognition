@@ -1,24 +1,24 @@
-import type { ErrorMsgParams, NestedKeyOf, ValidationErrors } from './types'
+import type { ErrorMsgParams, ValidationErrors } from './types'
 import { util } from '@aws-appsync/utils'
 
 export function isArray(value: unknown): value is unknown[] {
   return typeof value === 'object' && !!value && typeof (value as unknown[] | undefined)?.length === 'number'
 }
 
-export function getNestedValue<T extends { [key in keyof T & string]: T[key] }>(obj: Partial<T>, path: NestedKeyOf<T>): any {
+export function getNestedValue(obj: object, path: string): any {
   return path.split('.').reduce<unknown>((current, key) => util.matches('^\\d+$', key)
     ? (current as unknown[])[toNumber(key)]
     : (current as Record<string, unknown>)[key], obj)
 }
 
-export function setNestedValue<T extends { [key in keyof T & string]: T[key] }>(obj: Partial<T>, path: NestedKeyOf<T>, value: unknown): void {
+export function setNestedValue(obj: object, path: string, value: unknown): void {
   const keys = path.split('.')
   if (keys.length === 1) {
-    obj[keys[0] as keyof typeof obj] = value as any
+    (obj as any)[keys[0] as keyof typeof obj] = value as any
     return
   }
   const lastKey = keys.pop() as string
-  const parentObject = getNestedValue(obj, keys.join('.') as NestedKeyOf<T>)
+  const parentObject = getNestedValue(obj, keys.join('.'))
   if (typeof parentObject === 'object' && !!parentObject) {
     parentObject[lastKey] = value
   }

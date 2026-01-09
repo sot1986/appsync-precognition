@@ -1,3 +1,6 @@
+import type { Context } from '@aws-appsync/utils'
+import type { Ctx } from '../src/types'
+
 interface UtilError {
   msg: string
   errorType?: string
@@ -94,4 +97,28 @@ export function assertAppsyncError(error: unknown): asserts error is AppsyncErro
   if (error instanceof AppsyncError)
     return
   throw new Error('Expected AppsynError')
+}
+
+export function mockContext<
+  T extends { [key in keyof T]: T[key] },
+>(
+  param: {
+    args: T
+    stash?: Record<string, any>
+    request?: {
+      headers?: Record<string, string>
+    }
+  },
+): Ctx<T> {
+  return {
+    arguments: param.args,
+    args: param.args,
+    stash: {
+      ...param?.stash,
+    },
+    request: {
+      headers: param?.request?.headers ?? {},
+      ...param?.request,
+    },
+  }
 }

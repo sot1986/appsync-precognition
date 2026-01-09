@@ -2,7 +2,7 @@ import type { Ctx } from '../src/types'
 import { describe, expect, it, vi } from 'vitest'
 import { assertLocalized, precognitiveValidation } from '../src'
 import { localize } from '../src/i18n'
-import { assertAppsyncError } from './mocks'
+import { assertAppsyncError, mockContext } from './mocks'
 
 // Mock the @aws-appsync/utils module
 vi.mock('@aws-appsync/utils', async () => {
@@ -39,11 +39,11 @@ describe('test errors customization behaviour', () => {
       },
     }
     const args = { name: 'Marco', age: 15 }
-    const ctx: Ctx<typeof args> = {
+    const ctx = mockContext({
       args,
       request: { headers: { 'accepted-language': lang } },
       stash: {},
-    }
+    })
     localize(ctx, i18n)
     try {
       assertLocalized(ctx)
@@ -66,7 +66,7 @@ describe('test errors customization behaviour', () => {
 
   it.each([
     'it' as 'it' | 'de',
-    // 'de' as 'it' | 'de',
+    'de' as 'it' | 'de',
   ])('translate the attributes for all array elements', (lang) => {
     const i18n = {
       errors: {
@@ -97,14 +97,13 @@ describe('test errors customization behaviour', () => {
       { name: 'surf', level: 5 },
       { name: 'ski', level: 3 },
     ] }
-    const ctx: Ctx<typeof args> = {
+    const ctx = mockContext({
       args,
       request: { headers: { 'accepted-language': lang } },
       stash: {},
-    }
+    })
     localize(ctx, i18n)
     try {
-      assertLocalized(ctx)
       expect(ctx.stash.__i18n.locale).toBe(lang)
 
       precognitiveValidation(ctx, {

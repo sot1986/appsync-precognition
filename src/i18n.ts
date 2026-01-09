@@ -2,14 +2,15 @@ import type { Ctx, LocalizedCtx, NestedKeyOf, ValidationErrors } from './types'
 import { getHeader } from './utils'
 
 export function localize<
-  T extends object,
+  T extends { [key in keyof T]: T[key] },
+  TCtx extends Ctx<Partial<T>> = Ctx<Partial<T>>,
 >(
-  ctx: Ctx<T>,
+  ctx: TCtx,
   i18n?: {
     errors?: Record<string, Partial<ValidationErrors>>
     attributes?: Record<string, Partial<Record<`:${NestedKeyOf<T>}`, string>>>
   },
-): asserts ctx is Ctx<T> & LocalizedCtx<T, string> {
+): asserts ctx is LocalizedCtx<T, string, TCtx> {
   const locale = getHeader('Accepted-Language', ctx)
   if (locale) {
     ctx.stash.__i18n = {
