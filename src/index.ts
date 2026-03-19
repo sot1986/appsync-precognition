@@ -11,7 +11,7 @@ function isCustomFullRule(rule: FullRule | CustomFullRule | Omit<Rule, 'value'>)
   return typeof rule === 'object' && !!rule && Object.hasOwn(rule, 'rule')
 }
 
-export function validate<T extends { [key in keyof T & string]: T[key] }>(
+export function validate<T extends Exclude<object, null>>(
   obj: Readonly<Partial<T>>,
   checks: Partial<{
     [key in NestedKeyOf<T>]: Array<
@@ -85,12 +85,23 @@ function sanitizeNestedArray(
   obj: object,
   nested: object,
 ): void {
-  Object.keys(nested).forEach((path) => {
-    const keys = path.split('.')
-    keys.forEach((k, idx) => {
-      if (k !== '*' || idx === 0)
+  let maxKeys: string[] = []
+  Object.keys(nested).forEach((path: string) => {
+    const currentKeys = path.split('.').filter(k => k === '*')
+    if (currentKeys.length > maxKeys.length) {
+      maxKeys = [...currentKeys]
+    }
+  })
+
+  maxKeys.forEach(() => {
+    Object.keys(nested).forEach((path) => {
+      const keys = path.split('.')
+      const wildcardIdx = keys.indexOf('*', 1)
+
+      if (wildcardIdx < 1)
         return
-      const parentPath = keys.slice(0, idx).join('.')
+
+      const parentPath = keys.slice(0, wildcardIdx).join('.')
       const parentValue = getNestedValue(
         obj,
         parentPath.startsWith(':') ? parentPath.slice(1) : parentPath,
@@ -101,7 +112,7 @@ function sanitizeNestedArray(
 
       parentValue.forEach((_, i) => {
         const idxPath = [...keys]
-        idxPath[idx] = `${i}`
+        idxPath[wildcardIdx] = `${i}`
         nested[idxPath.join('.') as keyof typeof nested] = nested[path as keyof typeof nested]
       })
       delete nested[path as keyof typeof nested]
@@ -109,7 +120,7 @@ function sanitizeNestedArray(
   })
 }
 
-export function precognitiveValidation<T extends { [key in keyof T & string]: T[key] }>(
+export function precognitiveValidation<T extends Exclude<object, null>>(
   ctx: Ctx<Partial<T>>,
   checks: Partial<{
     [key in NestedKeyOf<T>]: Array<

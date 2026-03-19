@@ -178,4 +178,57 @@ describe('test validate function', () => {
       expect(error.message).toBe(baseErrors.phone.replace(':attr', name))
     }
   })
+
+  it('returns multiple errors when failing validation', () => {
+    try {
+      validate({ name: 'Mar', age: 17, active: true }, {
+        name: ['required', ['min', 4]],
+        age: ['required', ['min', 18]],
+        active: ['required', 'boolean'],
+      })
+      expect(true).toBe(false)
+    }
+    catch (error) {
+      expect(error).toBeInstanceOf(AppsyncError)
+      if (!(error instanceof AppsyncError)) {
+        throw new Error('This should not happen')
+      }
+      expect(error.message).toBe('age min value is 18')
+      expect(error.errors).toHaveLength(2)
+      expect(error.errors[0].msg).toBe('name must have at least 4 characters')
+      expect(error.errors[1].msg).toBe('age min value is 18')
+    }
+  })
+
+  it('inferes deeply nested keys', () => {
+    interface Invitation {
+      email: string
+      role: string
+      companies: string[]
+    }
+    const data: { invitations: Invitation[] } = {
+      invitations: [
+        {
+          email: 'test@example.com',
+          role: 'admin',
+          companies: ['company1', 'company2'],
+        },
+        {
+          email: 'test2@example.com',
+          role: 'user',
+          companies: ['company1'],
+        },
+      ],
+    }
+
+    const validated = validate(data, {
+      'invitations': ['required', 'array'],
+      'invitations.*.email': ['required', 'email'],
+      'invitations.*.role': ['required', ['in', 'admin', 'user', 'manager']],
+      'invitations.*.companies': ['required', 'array'],
+      'invitations.*.companies.*': ['required', 'string'],
+    })
+
+    expect(validated).toEqual(data)
+  })
 })

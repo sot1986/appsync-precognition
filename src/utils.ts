@@ -6,9 +6,11 @@ export function isArray(value: unknown): value is unknown[] {
 }
 
 export function getNestedValue(obj: object, path: string): any {
-  return path.split('.').reduce<unknown>((current, key) => util.matches('^\\d+$', key)
-    ? (current as unknown[])[toNumber(key)]
-    : (current as Record<string, unknown>)[key], obj)
+  return path.split('.').reduce<unknown>((current, key) => {
+    return util.matches('^\\d+$', key)
+      ? (current as unknown[])[toNumber(key)]
+      : (current as Record<string, unknown>)[key]
+  }, obj)
 }
 
 export function setNestedValue(obj: object, path: string, value: unknown): void {
