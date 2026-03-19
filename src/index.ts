@@ -11,7 +11,7 @@ function isCustomFullRule(rule: FullRule | CustomFullRule | Omit<Rule, 'value'>)
   return typeof rule === 'object' && !!rule && Object.hasOwn(rule, 'rule')
 }
 
-export function validate<T extends Exclude<object, null>>(
+export function validate<T>(
   obj: Readonly<Partial<T>>,
   checks: Partial<{
     [key in NestedKeyOf<T>]: Array<
@@ -28,14 +28,16 @@ export function validate<T extends Exclude<object, null>>(
 ): T {
   let error: { msg?: string, errorType?: string, data?: any, errorInfo?: any } = {}
   const errors: ValidationErrors = { ...baseErrors, ...options?.errors }
+  if (typeof obj !== 'object')
+    util.error('Object expected')
 
   sanitizeNestedArray(obj, checks)
   if (options?.attributes)
     sanitizeNestedArray(obj, options.attributes)
 
-  const validated: T = JSON.parse(JSON.stringify(obj))
+  const validated: T & object = JSON.parse(JSON.stringify(obj))
   Object.keys(checks).forEach((path) => {
-    let value = getNestedValue(validated, path as NestedKeyOf<T>)
+    let value = getNestedValue(validated, path)
     if (typeof value === 'string') {
       value = cleanString(value, options)
       setNestedValue(validated, path as NestedKeyOf<T>, value)
@@ -120,7 +122,7 @@ function sanitizeNestedArray(
   })
 }
 
-export function precognitiveValidation<T extends Exclude<object, null>>(
+export function precognitiveValidation<T>(
   ctx: Ctx<Partial<T>>,
   checks: Partial<{
     [key in NestedKeyOf<T>]: Array<
