@@ -1,3 +1,11 @@
+## [0.5.10](https://github.com/sot1986/appsync-precognition/compare/v0.5.9...v0.5.10) (2026-03-19)
+
+
+### Bug Fixes
+
+* add support for multiple wildcard in same validation rule ([f321e98](https://github.com/sot1986/appsync-precognition/commit/f321e98ce2222b637332c4c239ef5ffe552701bf))
+* merge with local changes ([bb470c6](https://github.com/sot1986/appsync-precognition/commit/bb470c6dc224c275a8f71ea74f71a4d202e90348))
+
 ## [0.5.9](https://github.com/sot1986/appsync-precognition/compare/v0.5.8...v0.5.9) (2026-01-09)
 
 
