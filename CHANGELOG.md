@@ -1,3 +1,10 @@
+## [0.5.11](https://github.com/sot1986/appsync-precognition/compare/v0.5.10...v0.5.11) (2026-03-19)
+
+
+### Bug Fixes
+
+* remove any contraint to have best autocompletion ([64461f7](https://github.com/sot1986/appsync-precognition/commit/64461f76fc678728040a69f46e9ea1b24e97a96a))
+
 ## [0.5.10](https://github.com/sot1986/appsync-precognition/compare/v0.5.9...v0.5.10) (2026-03-19)
 
 
