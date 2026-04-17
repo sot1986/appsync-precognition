@@ -158,7 +158,7 @@ interface HasConstructor {
   new (...args: unknown[]): unknown
 }
 
-export type NestedKeyOf<T> = T extends Record<infer Key, unknown>
+export type NestedKeyOf<T> = T extends Partial<{ [key in infer Key]: unknown }>
   ? T extends HasConstructor
     ? never
     : T extends CallableFunction
