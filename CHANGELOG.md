@@ -1,3 +1,11 @@
+## [0.5.13](https://github.com/sot1986/appsync-precognition/compare/v0.5.12...v0.5.13) (2026-04-30)
+
+
+### Bug Fixes
+
+* improve sometimes as per JS runtime constraint ([70abb44](https://github.com/sot1986/appsync-precognition/commit/70abb44949dd72e2dda77c2bb3afa0d11fe0d876))
+* merge with main origin ([3a02973](https://github.com/sot1986/appsync-precognition/commit/3a0297391e58f135ad14d74467c96a5de9379e31))
+
 ## [0.5.12](https://github.com/sot1986/appsync-precognition/compare/v0.5.11...v0.5.12) (2026-04-17)
 
 
