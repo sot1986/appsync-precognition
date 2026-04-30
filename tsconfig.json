@@ -4,7 +4,7 @@
     "lib": ["ES2022"],
     "rootDir": "./src",
     "module": "ES2022",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "typeRoots": ["./src/types", "./node_modules/@types"],
     "strict": true,
     "declaration": true,

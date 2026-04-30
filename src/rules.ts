@@ -20,7 +20,8 @@ export function parse<T>(
     case 'nullable':
       return nullableRule(opt)
     case 'sometimes':
-      return sometimesRule(opt)
+      util.error('sometimes rule is not allowed here')
+      break
     case 'min':
     case 'bigger':
       return betweenRule(opt, (p[0]! as number), undefined, n === 'bigger')
@@ -185,13 +186,13 @@ function nullableRule<T>({ value, msg, errors }: ParseOptions<T>): ParsedRule<T>
   return result
 }
 
-function sometimesRule<T>({ value, msg, errors }: ParseOptions<T>): ParsedRule<T> {
+export function sometimesRule<T>({ value, msg, errors, parent, key }: ParseOptions<T> & { parent: object, key: string }): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: true,
     msg: msg ?? errors.sometimes,
     value,
   }
-  if (typeof value === 'undefined') {
+  if (!Object.hasOwn(parent, key)) {
     result.skipNext = true
     return result
   }

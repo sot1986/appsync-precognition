@@ -38,42 +38,50 @@ export function validate<T>(
   const validated: T & object = JSON.parse(JSON.stringify(obj))
   Object.keys(checks).forEach((path) => {
     let value = getNestedValue(validated, path)
+    const parent: object = path.split('.').length > 1
+      ? getNestedValue(validated, path.split('.').slice(0, -1).join('.'))
+      : validated
     if (typeof value === 'string') {
       value = cleanString(value, options)
       setNestedValue(validated, path as NestedKeyOf<T>, value)
     }
 
     let skip: boolean = false
-    checks[path as keyof typeof checks]?.forEach((rule) => {
-      if (skip)
-        return
+    const keyRules = checks[path as keyof typeof checks]
+    if (keyRules?.length) {
+      keyRules.forEach((rule) => {
+        if (skip)
+          return
 
-      const result = isRule(rule)
-        ? { ...rule, value, msg: rule.msg ?? errors.invalid }
-        : isCustomFullRule(rule)
-          ? rules.parse({ value, msg: rule.msg, errors }, rule.rule)
-          : rules.parse({ value, errors }, rule)
+        const result = isRule(rule)
+          ? { ...rule, value, msg: rule.msg ?? errors.invalid }
+          : isCustomFullRule(rule)
+            ? rules.parse({ value, msg: rule.msg, errors }, rule.rule)
+            : rule === 'sometimes'
+              ? rules.sometimesRule({ value, errors, parent, key: path.split('.').pop()! })
+              : rules.parse({ value, errors }, rule)
 
-      skip = !!result.skipNext || !result.check
+        skip = !!result.skipNext || !result.check
 
-      if (result.check)
-        return
+        if (result.check)
+          return
 
-      if (error.msg)
-        util.appendError(error.msg, error.errorType, error.data, error.errorInfo)
+        if (error.msg)
+          util.appendError(error.msg, error.errorType, error.data, error.errorInfo)
 
-      result.params = result.params ?? {}
+        result.params = result.params ?? {}
 
-      if (util.matches(':attr', result.msg))
-        result.params[':attr'] = options?.attributes?.[`:${path as NestedKeyOf<T>}`] ?? formatAttributeName(path as NestedKeyOf<T>)
+        if (util.matches(':attr', result.msg))
+          result.params[':attr'] = options?.attributes?.[`:${path as NestedKeyOf<T>}`] ?? formatAttributeName(path as NestedKeyOf<T>)
 
-      error = {
-        msg: parseErrorMessage(result.msg, result.params),
-        errorType: 'ValidationError',
-        data: null,
-        errorInfo: { path, value },
-      }
-    })
+        error = {
+          msg: parseErrorMessage(result.msg, result.params),
+          errorType: 'ValidationError',
+          data: null,
+          errorInfo: { path, value },
+        }
+      })
+    }
   })
 
   if (!error.msg) {
