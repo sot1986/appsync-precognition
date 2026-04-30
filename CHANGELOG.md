@@ -1,3 +1,10 @@
+## [0.5.12](https://github.com/sot1986/appsync-precognition/compare/v0.5.11...v0.5.12) (2026-04-17)
+
+
+### Bug Fixes
+
+* improve NestedKeyOf to handle partials ([41505c3](https://github.com/sot1986/appsync-precognition/commit/41505c31e6c872a80f8749b0a94f1faa03891e28))
+
 ## [0.5.11](https://github.com/sot1986/appsync-precognition/compare/v0.5.10...v0.5.11) (2026-03-19)
 
 
