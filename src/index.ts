@@ -184,6 +184,20 @@ export function precognitiveValidation<T>(
   runtime.earlyReturn(null, { skipTo: options?.skipTo ?? 'END' })
 }
 
+export function validationError<T = any>(
+  msg: string,
+  options?: { path?: NestedKeyOf<T>, value?: any },
+): never {
+  util.error(msg, 'ValidationError', null, { ...options })
+}
+
+export function appendValidationError<T = any>(
+  msg: string,
+  options?: { path?: NestedKeyOf<T>, value?: any },
+): void {
+  util.appendError(msg, 'ValidationError', null, { ...options })
+}
+
 export function formatAttributeName(path: string): string {
   return path.split('.').reduce((acc, part) => {
     if (util.matches('^\\d+$', part)) {
