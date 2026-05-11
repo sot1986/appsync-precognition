@@ -1,3 +1,11 @@
+## [0.5.14](https://github.com/sot1986/appsync-precognition/compare/v0.5.13...v0.5.14) (2026-05-11)
+
+
+### Bug Fixes
+
+* add custom validation helpers ([afb44cb](https://github.com/sot1986/appsync-precognition/commit/afb44cb1d212f1734d98dfcdb0fde00cc57177af))
+* merged with latest release ([30c973d](https://github.com/sot1986/appsync-precognition/commit/30c973dcbb561cbcc7723a8a127a5fd86e180554))
+
 ## [0.5.13](https://github.com/sot1986/appsync-precognition/compare/v0.5.12...v0.5.13) (2026-04-30)
 
 
