@@ -1,4 +1,3 @@
-import type { Context } from '@aws-appsync/utils'
 import type { Ctx } from '../src/types'
 
 interface UtilError {

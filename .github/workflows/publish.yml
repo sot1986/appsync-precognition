@@ -5,8 +5,8 @@ on:
     branches: [main]
 
 permissions:
-  id-token: write  # Required for OIDC
-  contents: write  # Add this for git operations
+  id-token: write # Required for OIDC
+  contents: write # Add this for git operations
 
 jobs:
   publish:
@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -25,7 +25,7 @@ jobs:
       - run: npm ci
       - run: npm run build --if-present
       - run: npm test
-      
+
       - name: Release
         run: npx semantic-release
         env:
