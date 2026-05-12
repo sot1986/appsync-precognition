@@ -1,3 +1,10 @@
+## [0.5.16](https://github.com/sot1986/appsync-precognition/compare/v0.5.15...v0.5.16) (2026-05-12)
+
+
+### Bug Fixes
+
+* update regex rule ([d615e7f](https://github.com/sot1986/appsync-precognition/commit/d615e7f60af076b770b33f1858e64de1adcc5d5b))
+
 ## [0.5.15](https://github.com/sot1986/appsync-precognition/compare/v0.5.14...v0.5.15) (2026-05-12)
 
 
