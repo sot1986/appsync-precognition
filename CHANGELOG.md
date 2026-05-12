@@ -1,3 +1,10 @@
+## [0.5.19](https://github.com/sot1986/appsync-precognition/compare/v0.5.18...v0.5.19) (2026-05-12)
+
+
+### Bug Fixes
+
+* update regex error message ([7198f6c](https://github.com/sot1986/appsync-precognition/commit/7198f6c2c056d0033d6258d27ec8be14c5067d76))
+
 ## [0.5.18](https://github.com/sot1986/appsync-precognition/compare/v0.5.17...v0.5.18) (2026-05-12)
 
 
