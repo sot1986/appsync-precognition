@@ -1,3 +1,10 @@
+## [0.5.15](https://github.com/sot1986/appsync-precognition/compare/v0.5.14...v0.5.15) (2026-05-12)
+
+
+### Bug Fixes
+
+* use of validationError utility functions ([33d795a](https://github.com/sot1986/appsync-precognition/commit/33d795ac29f7005ca0a7ae9629ab29e93521d039))
+
 ## [0.5.14](https://github.com/sot1986/appsync-precognition/compare/v0.5.13...v0.5.14) (2026-05-11)
 
 
