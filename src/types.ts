@@ -108,8 +108,6 @@ export interface ValidationErrors {
   type: string
   /** :attr must match :pattern */
   regex: string
-  /** attr: must match any of :patterns */
-  regex_patterns: string
   /** :attr is required */
   required: string
   /** :attr is nullable */
