@@ -1,3 +1,10 @@
+## [0.5.18](https://github.com/sot1986/appsync-precognition/compare/v0.5.17...v0.5.18) (2026-05-12)
+
+
+### Bug Fixes
+
+* change bundling strategy ([9491e9c](https://github.com/sot1986/appsync-precognition/commit/9491e9c06d618bb4cc78f16cde7f34b8047b6c1b))
+
 ## [0.5.17](https://github.com/sot1986/appsync-precognition/compare/v0.5.16...v0.5.17) (2026-05-12)
 
 
