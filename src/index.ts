@@ -67,7 +67,7 @@ export function validate<T>(
           return
 
         if (error.msg)
-          util.appendError(error.msg, error.errorType, error.data, error.errorInfo)
+          appendValidationError(error.msg, { ...error.errorInfo })
 
         result.params = result.params ?? {}
 
@@ -88,7 +88,7 @@ export function validate<T>(
     return validated as T
   }
 
-  util.error(error.msg, error.errorType, error.data, error.errorInfo)
+  validationError(error.msg, { ...error.errorInfo })
 }
 
 function sanitizeNestedArray(
