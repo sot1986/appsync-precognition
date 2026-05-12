@@ -127,9 +127,12 @@ function regexRule<T>(options: ParseOptions<T>, ...p: string[]): ParsedRule<T> {
   }
   if (typeof options.value === 'string' || typeof options.value === 'number') {
     const valStr = typeof options.value === 'string' ? options.value : `${options.value}`
-    result.check = p.reduce((c, z) => {
-      return c || util.matches(z, valStr)
-    }, false)
+    let check = false
+    p.forEach((pattern) => {
+      if (check || util.matches(pattern, valStr))
+        check = true
+    })
+    result.check = check
   }
   return result
 }

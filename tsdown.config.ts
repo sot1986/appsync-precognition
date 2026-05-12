@@ -21,11 +21,7 @@ export default defineConfig({
     codegen: {
       removeWhitespace: true,
     },
-    mangle: {
-      keepNames: false,
-      toplevel: false,
-      debug: false,
-    },
+    mangle: false,
     compress: false,
   },
 })
