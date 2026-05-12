@@ -116,21 +116,21 @@ function betweenRule<T>(
   return result
 }
 
-function regexRule<T>({ value, msg, errors }: ParseOptions<T>, ...p: string[]): ParsedRule<T> {
+function regexRule<T>(options: ParseOptions<T>, ...p: string[]): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: false,
-    msg: msg ?? (p.length === 1 ? errors.regex : errors.regex_patterns),
-    value,
+    msg: options.msg ?? (p.length === 1 ? options.errors.regex : options.errors.regex_patterns),
+    value: options.value,
     params: p.length === 1
       ? { ':pattern': p[0]! }
       : { ':patterns': p.join(', ') },
   }
-  if (typeof value === 'string')
-    result.check = p.some(pt => util.matches(pt, value))
-
-  if (typeof value === 'number')
-    result.check = p.some(pt => util.matches(pt, `${value}`))
-
+  if (typeof options.value === 'string' || typeof options.value === 'number') {
+    const valStr = typeof options.value === 'string' ? options.value : `${options.value}`
+    result.check = p.reduce((acc, currPattern) => {
+      return acc || util.matches(currPattern, valStr)
+    }, false)
+  }
   return result
 }
 
