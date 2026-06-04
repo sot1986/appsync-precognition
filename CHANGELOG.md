@@ -1,3 +1,13 @@
+## [0.5.20](https://github.com/sot1986/appsync-precognition/compare/v0.5.19...v0.5.20) (2026-06-04)
+
+
+### Bug Fixes
+
+* augment type definition of NestedKeyOf ([c69cdbb](https://github.com/sot1986/appsync-precognition/commit/c69cdbb9a2a7930514d97bdcd06ac86c36c9d301))
+* resolve peer dependency conflict for @aws-appsync/eslint-plugin by downgrading eslint and typescript ([ab2e812](https://github.com/sot1986/appsync-precognition/commit/ab2e81267f5cc058de9e0e483d55ad2bbdbe76c4))
+* update node deps ([47821af](https://github.com/sot1986/appsync-precognition/commit/47821af8496c09b56b1dcc0ae40256893ce95292))
+* update npm package deps ([a808264](https://github.com/sot1986/appsync-precognition/commit/a808264438533b9c877570e7956673066b0134b0))
+
 ## [0.5.19](https://github.com/sot1986/appsync-precognition/compare/v0.5.18...v0.5.19) (2026-05-12)
 
 
