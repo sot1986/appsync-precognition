@@ -162,17 +162,17 @@ export type NestedKeyOf<T> = T extends Partial<{ [key in infer Key]: unknown }>
     : T extends CallableFunction
       ? never
       : Key extends string | number
-        ? (ObjectKeys<T> |
-            (
+        ? (ObjectKeys<T>
+          | (
               T[Key] extends object | null | undefined
                 ? `${ObjectKeys<Pick<T, Key>>}.${NestedKeyOf<T[Key]>}`
                 : T extends unknown[]
-                ? T extends [unknown, ...unknown[]]
-                  ? never
-                : T[number] extends object
-                  ? `${number}.${NestedKeyOf<T[number]>}` | `*.${NestedKeyOf<T[number]>}`
+                  ? T extends [unknown, ...unknown[]]
+                    ? never
+                    : T[number] extends object
+                      ? `${number}.${NestedKeyOf<T[number]>}` | `*.${NestedKeyOf<T[number]>}`
+                      : never
                   : never
-              : never
             )
           )
         : never
