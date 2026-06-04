@@ -117,6 +117,7 @@ export const baseErrors: ValidationErrors = {
   beforeOrEqual: ':attr must be before or equal to :beforeOrEqual',
   after: ':attr must be after :after',
   afterOrEqual: ':attr must be after or equal to :afterOrEqual',
+  unique: ':attr must contain unique values',
   invalid: ':attr is not valid',
 }
 

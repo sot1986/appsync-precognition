@@ -19,6 +19,7 @@ export type FullRule
     | 'integer'
     | 'numeric'
     | 'phone'
+    | 'unique'
     | ['min', number]
     | ['max', number]
     | ['bigger', number]
@@ -122,6 +123,8 @@ export interface ValidationErrors {
   after: string
   /** :attr must be after or equal to :afterOrEqual */
   afterOrEqual: string
+  /** :attr must contain unique values */
+  unique: string
   /** :attr is not valid */
   invalid: string
 }

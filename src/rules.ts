@@ -63,6 +63,8 @@ export function parse<T>(
       return regexRule({ ...opt, msg: opt.msg ?? opt.errors.datetime }, datetime)
     case 'numeric':
       return regexRule({ ...opt, msg: opt.msg ?? opt.errors.numeric }, numeric)
+    case 'unique':
+      return uniqueRule(opt)
     default:
       return typeRule(opt, n)
   }
@@ -261,5 +263,22 @@ function afterRule<T>({ value, msg, errors }: ParseOptions<T>, p: string, strict
   if (typeof numDate === 'number')
     result.check = strict ? numDate > e : numDate >= e
 
+  return result
+}
+
+function uniqueRule<T>({ value, msg, errors }: ParseOptions<T>): ParsedRule<T> {
+  const result: ParsedRule<T> = {
+    check: false,
+    msg: msg ?? errors.unique,
+    value,
+  }
+  if (isArray(value)) {
+    const occurrences: Record<string, number> = {}
+    value.forEach((item) => {
+      const key = typeof item === 'string' ? item : `${item}`
+      occurrences[key] = (occurrences[key] || 0) + 1
+    })
+    result.check = Object.values(occurrences).every(count => count === 1)
+  }
   return result
 }
