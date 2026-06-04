@@ -147,7 +147,7 @@ type ArrayKeys<T extends unknown[]>
       : never
     : `${number}` | '*'
 
-type ObjectKeys<T extends object>
+type ObjectKeys<T extends object | null | undefined>
   = T extends unknown[]
     ? ArrayKeys<T>
     : keyof T & string
@@ -162,45 +162,34 @@ export type NestedKeyOf<T> = T extends Partial<{ [key in infer Key]: unknown }>
     : T extends CallableFunction
       ? never
       : Key extends string | number
-        ? (ObjectKeys<T> | (T[Key] extends object
-            ? `${ObjectKeys<Pick<T, Key>>}.${NestedKeyOf<T[Key]>}`
-            : T extends unknown[]
-              ? T extends [unknown, ...unknown[]]
-                ? never
+        ? (ObjectKeys<T> |
+            (
+              T[Key] extends object | null | undefined
+                ? `${ObjectKeys<Pick<T, Key>>}.${NestedKeyOf<T[Key]>}`
+                : T extends unknown[]
+                ? T extends [unknown, ...unknown[]]
+                  ? never
                 : T[number] extends object
                   ? `${number}.${NestedKeyOf<T[number]>}` | `*.${NestedKeyOf<T[number]>}`
                   : never
-              : never))
+              : never
+            )
+          )
         : never
   : never
+/*
+interface Failure {
+  id: string
+  title: string
+  description?: string
+  whys?: {
+    order: number
+    question?: string
+  }[] | null
+}
 
-// export type TypeOfNestedKey<T, K extends NestedKeyOf<T>>
-//   = K extends keyof T
-//     ? T[K]
-//     : K extends `${infer Key}.${infer Rest}`
-//       ? Key extends keyof T
-//         ? Rest extends NestedKeyOf<T[Key]>
-//           ? TypeOfNestedKey<T[Key], Rest>
-//           : never
-//         : Key extends `${number}`
-//           ? T extends readonly unknown[]
-//             ? Rest extends NestedKeyOf<T[number]>
-//               ? TypeOfNestedKey<T[number], Rest>
-//               : never
-//             : never
-//           : Key extends '*'
-//             ? T extends readonly (infer U)[]
-//               ? Rest extends NestedKeyOf<U>
-//                 ? TypeOfNestedKey<U, Rest>
-//                 : never
-//               : never
-//             : never
-//       : K extends '*'
-//         ? T extends readonly (infer U)[]
-//           ? U
-//           : never
-//         : never
-
+type Test = NestedKeyOf<Failure>
+*/
 export interface Ctx<
   T extends { [key in keyof T]: T[key] },
 > {
