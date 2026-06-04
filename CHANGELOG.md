@@ -1,3 +1,15 @@
+# [0.6.0](https://github.com/sot1986/appsync-precognition/compare/v0.5.20...v0.6.0) (2026-06-04)
+
+
+### Bug Fixes
+
+* ensure getNestedArray is used only when the parent is present ([cdf4561](https://github.com/sot1986/appsync-precognition/commit/cdf456195a3d616801ce2b3574ca0dad5e97fdf6))
+
+
+### Features
+
+* add unique rule ([476ee79](https://github.com/sot1986/appsync-precognition/commit/476ee79bb13ddbcef70bfdbecc35ed02d94c2581))
+
 ## [0.5.20](https://github.com/sot1986/appsync-precognition/compare/v0.5.19...v0.5.20) (2026-06-04)
 
 
