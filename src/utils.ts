@@ -5,7 +5,7 @@ export function isArray(value: unknown): value is unknown[] {
   return typeof value === 'object' && !!value && typeof (value as unknown[] | undefined)?.length === 'number'
 }
 
-export function getNestedValue(obj: object, path: string): any {
+export function getNestedValue(obj: Exclude<object, null>, path: string): any {
   return path.split('.').reduce<unknown>((current, key) => {
     return util.matches('^\\d+$', key)
       ? (current as unknown[])[toNumber(key)]
@@ -13,7 +13,24 @@ export function getNestedValue(obj: object, path: string): any {
   }, obj)
 }
 
-export function setNestedValue(obj: object, path: string, value: unknown): void {
+export function isParentPathValid(obj: Exclude<object, null>, path: string): boolean {
+  let current: any = obj
+  let valid = true
+  path.split('.').forEach((key) => {
+    if (!valid)
+      return
+    if (!current || typeof current !== 'object') {
+      valid = false
+      return
+    }
+    current = util.matches('^\\d+$', key)
+      ? current[toNumber(key)]
+      : current[key]
+  })
+  return valid && !!current
+}
+
+export function setNestedValue(obj: Exclude<object, null>, path: string, value: unknown): void {
   const keys = path.split('.')
   if (keys.length === 1) {
     (obj as any)[keys[0] as keyof typeof obj] = value as any

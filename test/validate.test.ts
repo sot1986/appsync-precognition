@@ -231,4 +231,29 @@ describe('test validate function', () => {
 
     expect(validated).toEqual(data)
   })
+
+  it.each([
+    { data: {}},
+    { data: { items: []}},
+    { data: { items: [ { name: 'Marco' }]}},
+    { data: { items: null}},
+  ] as { data: { items?: null | {name: string}[]} }[]  )(
+    'detects nested array sanitization failure when array is null', ({data}) => {
+    const validated = validate(data, {
+      'items': ['nullable', 'array'],
+      'items.*.name': ['required', 'string'],
+    })
+    expect(validated).toMatchObject(data)
+  })
+
+  it('detects nested object validation when parent is null', () => {
+    const data = {
+      address: null as null | { city: string },
+    }
+
+    validate(data, {
+      'address': ['nullable', 'object'],
+      'address.city': ['required', 'string'],
+    })
+  })
 })

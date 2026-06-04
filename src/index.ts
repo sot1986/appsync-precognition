@@ -1,7 +1,7 @@
 import type { Ctx, CustomFullRule, FullRule, I18n, NestedKeyOf, Rule, ValidationErrors } from './types'
 import { runtime, util } from '@aws-appsync/utils'
 import * as rules from './rules'
-import { baseErrors, cleanString, getHeader, getNestedValue, isArray, parseErrorMessage, setNestedValue } from './utils'
+import { baseErrors, cleanString, getHeader, getNestedValue, isArray, isParentPathValid, parseErrorMessage, setNestedValue } from './utils'
 
 function isRule(rule: FullRule | CustomFullRule | Omit<Rule, 'value'>): rule is Omit<Rule, 'value'> {
   return typeof rule === 'object' && !!rule && Object.hasOwn(rule, 'check')
@@ -28,7 +28,7 @@ export function validate<T>(
 ): T {
   let error: { msg?: string, errorType?: string, data?: any, errorInfo?: any } = {}
   const errors: ValidationErrors = { ...baseErrors, ...options?.errors }
-  if (typeof obj !== 'object')
+  if (typeof obj !== 'object' || !obj)
     util.error('Object expected')
 
   sanitizeNestedArray(obj, checks)
@@ -37,6 +37,12 @@ export function validate<T>(
 
   const validated: T & object = JSON.parse(JSON.stringify(obj))
   Object.keys(checks).forEach((path) => {
+    if (path.split('.').length > 1) {
+      const parentPath = path.split('.').slice(0, -1).join('.')
+      if (!isParentPathValid(validated, parentPath))
+        return
+    }
+
     let value = getNestedValue(validated, path)
     const parent: object = path.split('.').length > 1
       ? getNestedValue(validated, path.split('.').slice(0, -1).join('.'))
@@ -112,13 +118,19 @@ function sanitizeNestedArray(
         return
 
       const parentPath = keys.slice(0, wildcardIdx).join('.')
-      const parentValue = getNestedValue(
-        obj,
-        parentPath.startsWith(':') ? parentPath.slice(1) : parentPath,
-      )
+      const cleanParentPath = parentPath.startsWith(':') ? parentPath.slice(1) : parentPath
 
-      if (!isArray(parentValue))
+      if (!isParentPathValid(obj, cleanParentPath)) {
+        delete nested[path as keyof typeof nested]
         return
+      }
+
+      const parentValue = getNestedValue(obj, cleanParentPath)
+
+      if (!isArray(parentValue)) {
+        delete nested[path as keyof typeof nested]
+        return
+      }
 
       parentValue.forEach((_, i) => {
         const idxPath = [...keys]

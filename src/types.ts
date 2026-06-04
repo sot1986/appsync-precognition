@@ -169,7 +169,7 @@ export type NestedKeyOf<T> = T extends Partial<{ [key in infer Key]: unknown }>
                 : T extends unknown[]
                   ? T extends [unknown, ...unknown[]]
                     ? never
-                    : T[number] extends object
+                    : T[number] extends object 
                       ? `${number}.${NestedKeyOf<T[number]>}` | `*.${NestedKeyOf<T[number]>}`
                       : never
                   : never
