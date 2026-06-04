@@ -2,6 +2,19 @@ import type { CustomFullRule, FullRule, ParsedRule, ParseOptions } from './types
 import { util } from '@aws-appsync/utils'
 import { date, datetime, email, integer, isArray, numeric, phone, time, ulid, url, uuid } from './utils'
 
+const regexRules = {
+  email,
+  phone,
+  url,
+  uuid,
+  ulid,
+  integer,
+  date,
+  time,
+  datetime,
+  numeric,
+} as const
+
 export function parse<T>(
   opt: ParseOptions<T>,
   rule: FullRule | CustomFullRule,
@@ -44,25 +57,16 @@ export function parse<T>(
     case 'afterOrEqual':
       return afterRule(opt, p[0] as string, n === 'after')
     case 'email':
-      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.email }, email)
     case 'phone':
-      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.phone }, phone)
     case 'url':
-      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.url }, url)
     case 'uuid':
-      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.uuid }, uuid)
     case 'ulid':
-      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.ulid }, ulid)
     case 'integer':
-      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.integer }, integer)
     case 'date':
-      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.date }, date)
     case 'time':
-      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.time }, time)
     case 'datetime':
-      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.datetime }, datetime)
     case 'numeric':
-      return regexRule({ ...opt, msg: opt.msg ?? opt.errors.numeric }, numeric)
+      return regexRule({ ...opt, msg: opt.msg ?? opt.errors[n] }, regexRules[n])
     case 'unique':
       return uniqueRule(opt)
     default:
