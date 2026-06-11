@@ -60,12 +60,17 @@ export function mockUtil() {
     headers[key] = value
   }
 
+  function epochMilliSecondsToISO8601(value: number) {
+    return new Date(value).toISOString()
+  }
+
   return {
     appendError,
     error,
     matches,
     time: {
       parseISO8601ToEpochMilliSeconds,
+      epochMilliSecondsToISO8601,
     },
     http: {
       addResponseHeader,

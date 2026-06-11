@@ -242,12 +242,12 @@ function beforeRule<T>({ value, msg, errors }: ParseOptions<T>, start: string, s
       ? { ':before': start }
       : { ':beforeOrEqual': start },
   }
-  const startValue = util.time.parseISO8601ToEpochMilliSeconds(start)
-  const numDate = typeof value === 'string'
-    ? util.time.parseISO8601ToEpochMilliSeconds(value)
+  const compareValue = typeof value === 'number'
+    ? util.time.epochMilliSecondsToISO8601(value > 10000000000 ? value : value * 1000)
     : value
-  if (typeof numDate === 'number')
-    result.check = strict ? numDate < startValue : numDate <= startValue
+  if (typeof compareValue !== 'string')
+    return result
+  result.check = strict ? compareValue < start : compareValue <= start
   return result
 }
 
@@ -260,13 +260,12 @@ function afterRule<T>({ value, msg, errors }: ParseOptions<T>, p: string, strict
       ? { ':after': p }
       : { ':afterOrEqual': p },
   }
-  const e = util.time.parseISO8601ToEpochMilliSeconds(p)
-  const numDate = typeof value === 'string'
-    ? util.time.parseISO8601ToEpochMilliSeconds(value)
+  const compareValue = typeof value === 'number'
+    ? util.time.epochMilliSecondsToISO8601(value > 10000000000 ? value : value * 1000)
     : value
-  if (typeof numDate === 'number')
-    result.check = strict ? numDate > e : numDate >= e
-
+  if (typeof compareValue !== 'string')
+    return result
+  result.check = strict ? compareValue > p : compareValue >= p
   return result
 }
 

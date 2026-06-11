@@ -58,4 +58,13 @@ describe.concurrent('test beforeOrEqualRule validation', () => {
     const result = rules.parse({ value, errors }, ['beforeOrEqual', target])
     expect(result.check).toBe(false)
   })
+
+  it.each([
+    ['2023-01-01', '2023-12-31T23:59:59.999Z'], // before end of year
+    ['2023-06-15', '2023-06-15T12:00:00.000Z'], // same time (equal)
+    ['2022-12-31', '2023-01-01T00:00:00.000Z'], // before new year
+  ])('validates date strings before or equal to target', (value, target) => {
+    const result = rules.parse({ value, errors }, ['beforeOrEqual', target])
+    expect(result.check).toBe(true)
+  })
 })
