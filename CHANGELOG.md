@@ -1,3 +1,10 @@
+## [0.6.3](https://github.com/sot1986/appsync-precognition/compare/v0.6.2...v0.6.3) (2026-06-11)
+
+
+### Bug Fixes
+
+* make more robust :attr replacing in error messages ([39e2a24](https://github.com/sot1986/appsync-precognition/commit/39e2a24daee22bbe01b6c3361034ce9f10df7966))
+
 ## [0.6.2](https://github.com/sot1986/appsync-precognition/compare/v0.6.1...v0.6.2) (2026-06-11)
 
 
