@@ -1,3 +1,11 @@
+## [0.6.2](https://github.com/sot1986/appsync-precognition/compare/v0.6.1...v0.6.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* compare dates as simple strings ([b4fd3c5](https://github.com/sot1986/appsync-precognition/commit/b4fd3c5a209a1d766dbbe8dcf3bf29d5be2bd3aa))
+* merge with deployed version ([f2af59e](https://github.com/sot1986/appsync-precognition/commit/f2af59eba8e7a9348476983d420aaa0f2c1c9751))
+
 ## [0.6.1](https://github.com/sot1986/appsync-precognition/compare/v0.6.0...v0.6.1) (2026-06-04)
 
 
