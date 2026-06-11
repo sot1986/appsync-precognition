@@ -1,3 +1,11 @@
+## [0.6.1](https://github.com/sot1986/appsync-precognition/compare/v0.6.0...v0.6.1) (2026-06-04)
+
+
+### Bug Fixes
+
+* merge with deployed step ([2eeada3](https://github.com/sot1986/appsync-precognition/commit/2eeada32ecd8dbb60f901229b4ece1d9b2fd92af))
+* simplify switch case for predefined regex rules ([f0e4e7a](https://github.com/sot1986/appsync-precognition/commit/f0e4e7a19f4641af5cdd349ae1a3512e65f3b8df))
+
 # [0.6.0](https://github.com/sot1986/appsync-precognition/compare/v0.5.20...v0.6.0) (2026-06-04)
 
 
