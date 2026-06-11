@@ -83,7 +83,7 @@ function betweenRule<T>(
   const [min, max] = [maxV === Infinity, minV === -Infinity]
   const result: ParsedRule<T> = {
     check: false,
-    msg: msg ?? min
+    msg: msg ?? (min
       ? strict
         ? errors.biggerNumber
         : errors.minNumber
@@ -93,7 +93,7 @@ function betweenRule<T>(
           : errors.maxNumber
         : strict
           ? errors.withinNumber
-          : errors.betweenNumber,
+          : errors.betweenNumber),
     value,
     params: {
       ':min': `${minV}`,
@@ -105,21 +105,21 @@ function betweenRule<T>(
 
   if (typeof value === 'string') {
     result.check = value.length >= minV && value.length <= maxV
-    result.msg = msg ?? min
+    result.msg = msg ?? (min
       ? errors.minString
       : max
         ? errors.maxString
-        : errors.betweenString
+        : errors.betweenString)
   }
   if (isArray(value)) {
     result.check = value.length >= minV && value.length <= maxV
-    result.msg = msg ?? min
+    result.msg = msg ?? (min
       ? errors.minArray
       : max
         ? errors.maxArray
-        : errors.betweenArray
+        : errors.betweenArray)
   }
-  return result
+  return result;
 }
 
 function regexRule<T>(opt: ParseOptions<T>, ...pat: string[]): ParsedRule<T> {
@@ -236,7 +236,7 @@ function typeRule<T>({ value, msg, errors }: ParseOptions<T>, type: 'boolean' | 
 function beforeRule<T>({ value, msg, errors }: ParseOptions<T>, start: string, strict = false): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: false,
-    msg: msg ?? errors.before,
+    msg: msg ?? (strict ? errors.before : errors.beforeOrEqual),
     value,
     params: strict
       ? { ':before': start }
@@ -254,7 +254,7 @@ function beforeRule<T>({ value, msg, errors }: ParseOptions<T>, start: string, s
 function afterRule<T>({ value, msg, errors }: ParseOptions<T>, p: string, strict = false): ParsedRule<T> {
   const result: ParsedRule<T> = {
     check: false,
-    msg: msg ?? strict ? errors.after : errors.afterOrEqual,
+    msg: msg ?? (strict ? errors.after : errors.afterOrEqual),
     value,
     params: strict
       ? { ':after': p }

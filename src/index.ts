@@ -77,7 +77,8 @@ export function validate<T>(
 
         result.params = result.params ?? {}
 
-        if (util.matches(':attr', result.msg))
+        // eslint-disable-next-line e18e/prefer-includes, unicorn/prefer-includes
+        if (result.msg.indexOf(':attr') !== -1)
           result.params[':attr'] = options?.attributes?.[`:${path as NestedKeyOf<T>}`] ?? formatAttributeName(path as NestedKeyOf<T>)
 
         error = {
