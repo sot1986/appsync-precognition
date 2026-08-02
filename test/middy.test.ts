@@ -234,6 +234,49 @@ describe('middy Precognition Middleware', () => {
 
       await expect(handler(appsyncEvent, mockContext)).rejects.toThrow('Standard system failure')
     })
+
+    it('ignores AppSyncError when event is not an AppSync event', async () => {
+      const handler = middy(async () => {
+        throw new AppSyncError('Resource not found', 'NotFoundError')
+      }).use(appsyncErrorHandler())
+
+      const nonAppSyncEvent = { headers: {}, body: '{}' }
+      await expect(handler(nonAppSyncEvent, mockContext)).rejects.toThrow('Resource not found')
+    })
+
+    it('supports custom AppSyncMappedError implementing toErrorResult', async () => {
+      class CustomMappedError extends Error {
+        toErrorResult() {
+          return {
+            type: 'AppSyncError' as const,
+            errors: [{ message: 'Custom mapped error', errorType: 'CustomType', errorInfo: null }],
+            errorsCount: 1,
+          }
+        }
+      }
+
+      const handler = middy(async () => {
+        throw new CustomMappedError('Custom error message')
+      }).use(appsyncErrorHandler())
+
+      const res = await handler(appsyncEvent, mockContext)
+      expect(res).toEqual({
+        error: {
+          type: 'AppSyncError',
+          errors: [{ message: 'Custom mapped error', errorType: 'CustomType', errorInfo: null }],
+          errorsCount: 1,
+        },
+      })
+    })
+
+    it('passes through successful executions without altering response', async () => {
+      const handler = middy(async () => {
+        return { data: 'success' }
+      }).use(appsyncErrorHandler())
+
+      const res = await handler(appsyncEvent, mockContext)
+      expect(res).toEqual({ data: 'success' })
+    })
   })
 
   describe('resolveLambdaResponseTemplate helper', () => {
