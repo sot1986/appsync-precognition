@@ -28,6 +28,10 @@
     "./i18n": {
       "types": "./dist/i18n.d.ts",
       "import": "./dist/i18n.js"
+    },
+    "./middy": {
+      "types": "./dist/middy.d.ts",
+      "import": "./dist/middy.js"
     }
   },
   "main": "./dist/index.js",
@@ -47,12 +51,14 @@
     "semantic-release": "semantic-release"
   },
   "peerDependencies": {
-    "@aws-appsync/utils": "^2.0.3"
+    "@aws-appsync/utils": "^2.0.3",
+    "@middy/core": "^7.7.2"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.0.0",
     "@aws-appsync/eslint-plugin": "^2.0.2",
     "@aws-appsync/utils": "^2.1.1",
+    "@middy/core": "^7.7.2",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@types/node": "^25.9.1",

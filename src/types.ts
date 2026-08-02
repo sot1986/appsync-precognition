@@ -1,4 +1,20 @@
-export {}
+export { }
+
+export interface AppSyncErrorItem {
+  message: string
+  errorType?: string
+  errorInfo?: Record<string, any> | null
+}
+
+export interface AppSyncErrorResult {
+  type: 'AppSyncError'
+  errors: AppSyncErrorItem[]
+  errorsCount: number
+}
+
+export interface AppSyncMappedError {
+  toErrorResult: () => AppSyncErrorResult
+}
 
 export type FullRule
   = 'required'
@@ -172,7 +188,7 @@ export type NestedKeyOf<T> = T extends Partial<{ [key in infer Key]: unknown }>
                 : T extends unknown[]
                   ? T extends [unknown, ...unknown[]]
                     ? never
-                    : T[number] extends object 
+                    : T[number] extends object
                       ? `${number}.${NestedKeyOf<T[number]>}` | `*.${NestedKeyOf<T[number]>}`
                       : never
                   : never
@@ -180,19 +196,7 @@ export type NestedKeyOf<T> = T extends Partial<{ [key in infer Key]: unknown }>
           )
         : never
   : never
-/*
-interface Failure {
-  id: string
-  title: string
-  description?: string
-  whys?: {
-    order: number
-    question?: string
-  }[] | null
-}
 
-type Test = NestedKeyOf<Failure>
-*/
 export interface Ctx<
   T extends { [key in keyof T]: T[key] },
 > {
@@ -202,4 +206,46 @@ export interface Ctx<
   request: {
     headers: Record<string, string>
   }
+}
+
+export interface PrecognitionOptions<TInput> {
+  /**
+   * The validator function.
+   * Receives the event data and returns the validated data.
+   * If validation fails, it should throw an error that can be converted to validation errors.
+   */
+  validator: (event: TInput) => TInput | Promise<TInput>
+  /**
+   * Converts an error to validation errors.
+   * If returns `null` or `undefined`, the error will propagate as is.
+   */
+  toValidationErrors?: (error: Error) => {
+    message: string
+    errors: Record<string, string | string[]>
+  } | null | undefined
+  /**
+   * Returns the headers of the request event.
+   * Default to checking for `event.request.headers` and `event.headers`.
+   */
+  resolveRequestHeaders?: (event: TInput) => Record<string, string>
+  /**
+   * The name of the precognition header.
+   * Defaults to `'Precognition'`.
+   */
+  headerName?: string
+  /**
+   * The name of the validate only header.
+   * Defaults to `'Precognition-Validate-Only'`.
+   */
+  validateOnlyHeaderName?: string
+  /**
+   * The name of the success header.
+   * Defaults to `'Precognition-Success'`.
+   */
+  successHeaderName?: string
+  /**
+   * The status code to return for successful precognition requests.
+   * Defaults to `204`.
+   */
+  statusCode?: number
 }

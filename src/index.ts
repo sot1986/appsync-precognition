@@ -274,4 +274,14 @@ export function assertLocalized<
   util.error('Context arguements have not been localized')
 }
 
-export type { CustomFullRule, FullRule, I18n, Rule, ValidationErrors } from './types'
+export type {
+  AppSyncErrorItem,
+  AppSyncErrorResult,
+  AppSyncMappedError,
+  CustomFullRule,
+  FullRule,
+  I18n,
+  PrecognitionOptions,
+  Rule,
+  ValidationErrors,
+} from './types'
