@@ -276,7 +276,6 @@ export function assertLocalized<
 
 export type {
   AppSyncErrorItem,
-  AppSyncErrorResult,
   AppSyncMappedError,
   CustomFullRule,
   FullRule,

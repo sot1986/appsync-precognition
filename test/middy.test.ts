@@ -6,7 +6,6 @@ import {
   precognition,
   PrecognitionValidationError,
   resolveLambdaResponseTemplate,
-  resolveResponseHeaders,
 } from '../src/middy'
 
 describe('middy Precognition Middleware', () => {
@@ -162,12 +161,12 @@ describe('middy Precognition Middleware', () => {
 
       expect(response).toEqual({
         error: {
-          type: 'AppSyncError',
+          type: 'AppsyncError',
           errors: [
             { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: 'email' } },
             { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: 'age' } },
           ],
-          errorsCount: 2,
+          errorCount: 2,
         },
       })
     })
@@ -196,11 +195,11 @@ describe('middy Precognition Middleware', () => {
 
       expect(response).toEqual({
         error: {
-          type: 'AppSyncError',
+          type: 'AppsyncError',
           errors: [
             { message: 'Validation failed in third party library', errorType: 'ValidationError', errorInfo: { path: 'email' } },
           ],
-          errorsCount: 1,
+          errorCount: 1,
         },
       })
     })
@@ -220,9 +219,9 @@ describe('middy Precognition Middleware', () => {
       const res = await handler(appsyncEvent, mockContext)
       expect(res).toEqual({
         error: {
-          type: 'AppSyncError',
+          type: 'AppsyncError',
           errors: [{ message: 'Resource not found', errorType: 'NotFoundError', errorInfo: { id: '123' } }],
-          errorsCount: 1,
+          errorCount: 1,
         },
       })
     })
@@ -244,15 +243,9 @@ describe('middy Precognition Middleware', () => {
       await expect(handler(nonAppSyncEvent, mockContext)).rejects.toThrow('Resource not found')
     })
 
-    it('supports custom AppSyncMappedError implementing toErrorResult', async () => {
+    it('supports custom AppSyncMappedError implementing errorItems', async () => {
       class CustomMappedError extends Error {
-        toErrorResult() {
-          return {
-            type: 'AppSyncError' as const,
-            errors: [{ message: 'Custom mapped error', errorType: 'CustomType', errorInfo: null }],
-            errorsCount: 1,
-          }
-        }
+        errorItems = [{ message: 'Custom mapped error', errorType: 'CustomType', errorInfo: null }]
       }
 
       const handler = middy(async () => {
@@ -262,9 +255,9 @@ describe('middy Precognition Middleware', () => {
       const res = await handler(appsyncEvent, mockContext)
       expect(res).toEqual({
         error: {
-          type: 'AppSyncError',
+          type: 'AppsyncError',
           errors: [{ message: 'Custom mapped error', errorType: 'CustomType', errorInfo: null }],
-          errorsCount: 1,
+          errorCount: 1,
         },
       })
     })
@@ -285,47 +278,6 @@ describe('middy Precognition Middleware', () => {
       expect(template).toContain('$ctx.result.error.type == \'AppSyncError\'')
       expect(template).toContain('$util.appendError')
       expect(template).toContain('$util.toJson($ctx.result)')
-    })
-  })
-
-  describe('resolveResponseHeaders helper', () => {
-    const defaultOptions = {
-      headerName: 'Precognition',
-      validateOnlyHeaderName: 'Precognition-Validate-Only',
-      successHeaderName: 'Precognition-Success',
-      statusCode: 422,
-    }
-
-    it('returns correct precognition headers when precognitive request header is true', () => {
-      const mockReq: any = {
-        event: {
-          headers: {
-            Precognition: 'true',
-            'Precognition-Validate-Only': 'email,name',
-          },
-        },
-      }
-      const headers = resolveResponseHeaders(mockReq, defaultOptions, true)
-      expect(headers).toEqual({
-        Precognition: 'true',
-        'Precognition-Success': 'true',
-        'Precognition-Validate-Only': 'email,name',
-      })
-    })
-
-    it('returns precognition headers with success=false when validation fails', () => {
-      const mockReq: any = {
-        event: {
-          headers: {
-            Precognition: 'true',
-          },
-        },
-      }
-      const headers = resolveResponseHeaders(mockReq, defaultOptions, false)
-      expect(headers).toEqual({
-        Precognition: 'true',
-        'Precognition-Success': 'false',
-      })
     })
   })
 })

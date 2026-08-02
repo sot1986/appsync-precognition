@@ -6,14 +6,8 @@ export interface AppSyncErrorItem {
   errorInfo?: Record<string, any> | null
 }
 
-export interface AppSyncErrorResult {
-  type: 'AppSyncError'
-  errors: AppSyncErrorItem[]
-  errorsCount: number
-}
-
 export interface AppSyncMappedError {
-  toErrorResult: () => AppSyncErrorResult
+  errorItems: (() => AppSyncErrorItem[]) | AppSyncErrorItem[]
 }
 
 export type FullRule

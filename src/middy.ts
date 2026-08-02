@@ -1,7 +1,6 @@
 import type middy from '@middy/core'
 import type {
   AppSyncErrorItem,
-  AppSyncErrorResult,
   AppSyncMappedError,
   PrecognitionOptions,
 } from './types'
@@ -21,12 +20,8 @@ export class AppSyncError extends Error implements AppSyncMappedError {
     this.errorInfo = errorInfo ?? null
   }
 
-  public toErrorResult(): AppSyncErrorResult {
-    return {
-      type: 'AppSyncError',
-      errors: [{ message: this.message, errorType: this.errorType, errorInfo: this.errorInfo }],
-      errorsCount: 1,
-    }
+  public errorItems(): AppSyncErrorItem[] {
+    return [{ message: this.message, errorType: this.errorType, errorInfo: this.errorInfo }]
   }
 }
 
@@ -79,7 +74,7 @@ export class PrecognitionValidationError extends Error implements AppSyncMappedE
     }, {} as Record<string, string[]>)
   }
 
-  public toErrorResult(): AppSyncErrorResult {
+  public errorItems(): AppSyncErrorItem[] {
     const customMessage = (this.message && this.message !== 'The given data was invalid.' && this.message !== 'Validation failed')
       ? this.message
       : null
@@ -92,13 +87,9 @@ export class PrecognitionValidationError extends Error implements AppSyncMappedE
       })),
     )
 
-    return {
-      type: 'AppSyncError',
-      errors: items.length > 0
-        ? items
-        : [{ message: this.message, errorType: 'ValidationError', errorInfo: null }],
-      errorsCount: items.length > 0 ? items.length : 1,
-    }
+    return items.length > 0
+      ? items
+      : [{ message: this.message, errorType: 'ValidationError', errorInfo: null }]
   }
 }
 
@@ -213,7 +204,14 @@ export function precognition<TEvent = any, TResult = any>(
       if (isAppSyncEvent(request.event)) {
         request.event.response = request.event.response || {}
         request.event.response.headers = responseHeaders
-        request.response = { error: request.error.toErrorResult() } as unknown as TResult
+        const errors = request.error.errorItems()
+        request.response = {
+          error: {
+            type: 'AppsyncError',
+            errors,
+            errorCount: errors.length,
+          },
+        } as unknown as TResult
         request.error = null
         return
       }
@@ -236,8 +234,13 @@ export function appsyncErrorHandler<TEvent, TResult>(): middy.MiddlewareObj<TEve
     if (!request.error || !isAppSyncEvent(request.event))
       return
 
-    if ('toErrorResult' in request.error && typeof request.error?.toErrorResult === 'function') {
-      request.response = { error: request.error.toErrorResult() } as unknown as TResult
+    if (isAppSyncMappedError(request.error)) {
+      const errorItems = typeof request.error.errorItems === 'function' ? request.error.errorItems() : request.error.errorItems
+      request.response = { error: {
+        type: 'AppsyncError',
+        errors: errorItems,
+        errorCount: errorItems.length,
+      } } as unknown as TResult
       request.error = null
     }
   }
@@ -245,7 +248,7 @@ export function appsyncErrorHandler<TEvent, TResult>(): middy.MiddlewareObj<TEve
   return { onError }
 }
 
-export function resolveResponseHeaders<TEvent>(
+function resolveResponseHeaders<TEvent>(
   request: middy.Request<TEvent>,
   options: Required<Pick<PrecognitionOptions<TEvent>, 'headerName' | 'validateOnlyHeaderName' | 'successHeaderName' | 'statusCode'>>,
   success: boolean,
@@ -263,4 +266,8 @@ export function resolveResponseHeaders<TEvent>(
     respHeaders[validateOnlyHeaderName] = headers.get(validateOnlyHeaderName)!
 
   return respHeaders
+}
+
+function isAppSyncMappedError(error: object): error is AppSyncMappedError {
+  return Boolean(error && typeof error === 'object' && 'errorItems' in error && (typeof (error as any).errorItems === 'function' || Array.isArray((error as any).errorItems)))
 }
