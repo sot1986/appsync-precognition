@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/sot1986/appsync-precognition/compare/v0.6.3...v0.7.0) (2026-08-02)
+
+
+### Features
+
+* **middy:** add Middy middleware integration for AppSync and Precognition ([f4ddcda](https://github.com/sot1986/appsync-precognition/commit/f4ddcdaaed55df139d167421f7001f16059da987))
+
 ## [0.6.3](https://github.com/sot1986/appsync-precognition/compare/v0.6.2...v0.6.3) (2026-06-11)
 
 
