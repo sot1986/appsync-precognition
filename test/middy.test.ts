@@ -10,9 +10,7 @@ import {
 
 describe('middy Precognition Middleware', () => {
   const dummyValidator: any = (event: any) => {
-    const data = event?.body
-      ? (typeof event.body === 'string' ? JSON.parse(event.body) : event.body)
-      : (event?.arguments ?? event)
+    const data = event?.arguments ?? event?.body ?? event
     const errors: { path: string[], message: string }[] = []
 
     if (!data?.email) {
@@ -31,10 +29,7 @@ describe('middy Precognition Middleware', () => {
 
   const createHandler = () => {
     const baseHandler = async (event: any) => {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'Success', input: event.body }),
-      }
+      return { message: 'Success', input: event.arguments ?? event.body ?? event }
     }
 
     return middy(baseHandler).use(precognition({ validator: dummyValidator }))
@@ -45,76 +40,91 @@ describe('middy Precognition Middleware', () => {
   it('passes through normal valid requests', async () => {
     const handler = createHandler()
     const response = await handler({
-      headers: {},
-      body: { email: 'test@example.com', age: 20 },
+      request: { headers: {} },
+      arguments: { email: 'test@example.com', age: 20 },
     }, mockContext)
 
-    expect(response.statusCode).toBe(200)
-    expect(JSON.parse(response.body).message).toBe('Success')
+    expect(response).toEqual({ message: 'Success', input: { email: 'test@example.com', age: 20 } })
   })
 
   it('handles validation error during normal request via onError', async () => {
     const handler = createHandler()
     const response = await handler({
-      headers: {},
-      body: { age: 15 },
+      request: { headers: {} },
+      arguments: { age: 15 },
     }, mockContext)
 
-    expect(response.statusCode).toBe(422)
-    const body = JSON.parse(response.body)
-    expect(body.message).toBe('Validation failed')
-    expect(body.errors).toEqual([
-      { path: ['email'], message: 'Email is required' },
-      { path: ['age'], message: 'Age must be at least 18' },
-    ])
+    expect(response).toEqual({
+      error: {
+        type: 'AppSyncError',
+        errors: [
+          { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: ['email'], value: undefined } },
+          { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: ['age'], value: undefined } },
+        ],
+        errorsCount: 2,
+      },
+    })
   })
 
-  it('handles successful precognitive validation request (early 204)', async () => {
+  it('handles successful precognitive validation request (early data: null and response headers)', async () => {
     const handler = createHandler()
-    const response = await handler({
-      headers: {
-        Precognition: 'true',
+    const event: any = {
+      request: {
+        headers: {
+          Precognition: 'true',
+        },
       },
-      body: { email: 'john@example.com', age: 25 },
-    }, mockContext)
+      arguments: { email: 'john@example.com', age: 25 },
+    }
+    const response = await handler(event, mockContext)
 
-    expect(response.statusCode).toBe(204)
-    expect(response.headers.Precognition).toBe('true')
-    expect(response.headers['Precognition-Success']).toBe('true')
+    expect(response).toEqual({ data: null })
+    expect(event.response.headers.Precognition).toBe('true')
+    expect(event.response.headers['Precognition-Success']).toBe('true')
   })
 
-  it('handles failed precognitive validation request (returns 422 with precognition headers)', async () => {
+  it('handles failed precognitive validation request (returns AppSync error with precognition headers on event)', async () => {
     const handler = createHandler()
-    const response = await handler({
-      headers: {
-        Precognition: 'true',
+    const event: any = {
+      request: {
+        headers: {
+          Precognition: 'true',
+        },
       },
-      body: { age: 10 },
-    }, mockContext)
+      arguments: { age: 10 },
+    }
+    const response = await handler(event, mockContext)
 
-    expect(response.statusCode).toBe(422)
-    expect(response.headers.Precognition).toBe('true')
-    const body = JSON.parse(response.body)
-    expect(body.errors).toEqual([
-      { path: ['email'], message: 'Email is required' },
-      { path: ['age'], message: 'Age must be at least 18' },
-    ])
+    expect(event.response.headers.Precognition).toBe('true')
+    expect(response).toEqual({
+      error: {
+        type: 'AppSyncError',
+        errors: [
+          { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: ['email'], value: undefined } },
+          { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: ['age'], value: undefined } },
+        ],
+        errorsCount: 2,
+      },
+    })
   })
 
   it('respects Precognition-Validate-Only header', async () => {
     const handler = createHandler()
-    const response = await handler({
-      headers: {
-        'Precognition': 'true',
-        'Precognition-Validate-Only': 'age',
+    const event: any = {
+      request: {
+        headers: {
+          'Precognition': 'true',
+          'Precognition-Validate-Only': 'age',
+        },
       },
-      body: { email: 'valid@example.com', age: 25 },
-    }, mockContext)
+      arguments: { email: 'valid@example.com', age: 25 },
+    }
+    const response = await handler(event, mockContext)
 
-    expect(response.statusCode).toBe(204)
-    expect(response.headers.Precognition).toBe('true')
-    expect(response.headers['Precognition-Success']).toBe('true')
-    expect(response.headers['Precognition-Validate-Only']).toBe('age')
+    expect(response).toEqual({ data: null })
+    expect(event.response.headers.Precognition).toBe('true')
+    expect(event.response.headers['Precognition-Success']).toBe('true')
+    expect(event.response.headers['Precognition-Validate-Only']).toBe('age')
   })
 
   it('supports PrecognitionValidationError instantiated with array of errors per key', () => {
@@ -142,15 +152,16 @@ describe('middy Precognition Middleware', () => {
   })
 
   it('supports passing validator function directly as shortcut argument', async () => {
+    const event: any = {
+      request: { headers: { Precognition: 'true' } },
+      arguments: { email: 'direct@example.com', age: 20 },
+    }
     const handler = middy(async () => ({ statusCode: 200, body: 'ok' }))
       .use(precognition(dummyValidator))
 
-    const response = await handler({
-      headers: { Precognition: 'true' },
-      body: { email: 'direct@example.com', age: 20 },
-    }, mockContext)
+    const response = await handler(event, mockContext)
 
-    expect(response.statusCode).toBe(204)
+    expect(response).toEqual({ data: null })
   })
 
   describe('evaluate AppSync Resolver mode', () => {
@@ -243,15 +254,6 @@ describe('middy Precognition Middleware', () => {
       }).use(appsyncErrorHandler())
 
       await expect(handler(appsyncEvent, mockContext)).rejects.toThrow('Standard system failure')
-    })
-
-    it('ignores AppSyncError when event is not an AppSync event', async () => {
-      const handler = middy(async () => {
-        throw new AppSyncError('Resource not found', 'NotFoundError')
-      }).use(appsyncErrorHandler())
-
-      const nonAppSyncEvent = { headers: {}, body: '{}' }
-      await expect(handler(nonAppSyncEvent, mockContext)).rejects.toThrow('Resource not found')
     })
 
     it('supports custom AppSyncMappedError implementing errorItems', async () => {

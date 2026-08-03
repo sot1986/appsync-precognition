@@ -87,23 +87,21 @@ export class PrecognitionValidationError extends Error implements AppSyncMappedE
   }
 }
 
-function isAppSyncEvent(event: unknown): event is { request: { headers: Record<string, string> }, response: { headers: Record<string, string> } } {
-  if (!event || typeof event !== 'object' || !('info' in event))
-    return false
-  const info = (event as any).info
-  return Boolean(info && typeof info === 'object' && (info.fieldName || info.parentTypeName))
+export interface AppSyncEvent {
+  request?: { headers?: Record<string, string> }
+  response?: { headers?: Record<string, string> }
+  [key: string]: any
 }
 
-function hasHeaders(event: unknown): event is { headers: Record<string, string> } {
-  return Boolean(event && typeof event === 'object' && 'headers' in event && typeof event.headers === 'object' && event.headers)
+export function assertAppSyncEvent(event: unknown): asserts event is AppSyncEvent {
+  if (!event || typeof event !== 'object') {
+    throw new TypeError('Expected event to be an AppSync event object')
+  }
 }
 
-function resolveRequestHeaders(event: unknown): Record<string, string> {
-  if (isAppSyncEvent(event) && hasHeaders(event.request))
-    return event.request.headers
-  if (hasHeaders(event))
-    return event.headers
-  return {}
+function resolveRequestHeaders(event: any): Record<string, string> {
+  assertAppSyncEvent(event)
+  return event.request?.headers ?? {}
 }
 
 function resolveOptions<TEvent>(
@@ -138,17 +136,10 @@ export function precognition<TEvent = any, TResult = any>(
           return
         }
 
-        if (isAppSyncEvent(request.event)) {
-          request.event.response = request.event.response || {}
-          request.event.response.headers = resolveResponseHeaders(request, opt, true)
-          return { data: null } as TResult
-        }
-
-        return {
-          statusCode: 204,
-          headers: resolveResponseHeaders(request, opt, true),
-          body: '',
-        } as TResult
+        assertAppSyncEvent(request.event)
+        request.event.response = request.event.response || {}
+        request.event.response.headers = resolveResponseHeaders(request, opt, true)
+        return { data: null } as TResult
       }
       catch (error) {
         if (error instanceof Error === false)
@@ -174,17 +165,10 @@ export function precognition<TEvent = any, TResult = any>(
         if (Object.keys(precognitiveErrors).length > 0)
           throw new PrecognitionValidationError(error.message, precognitiveErrors)
 
-        if (isAppSyncEvent(request.event)) {
-          request.event.response = request.event.response || {}
-          request.event.response.headers = resolveResponseHeaders(request, opt, true)
-          return { data: null } as TResult
-        }
-
-        return {
-          statusCode: 204,
-          headers: resolveResponseHeaders(request, opt, true),
-          body: '',
-        } as TResult
+        assertAppSyncEvent(request.event)
+        request.event.response = request.event.response || {}
+        request.event.response.headers = resolveResponseHeaders(request, opt, true)
+        return { data: null } as TResult
       }
     },
     onError: async (request) => {
@@ -196,28 +180,16 @@ export function precognition<TEvent = any, TResult = any>(
 
       const responseHeaders = resolveResponseHeaders(request, opt, false)
 
-      if (isAppSyncEvent(request.event)) {
-        request.event.response = request.event.response || {}
-        request.event.response.headers = responseHeaders
-        const errors = request.error.errorItems()
-        request.response = {
-          error: {
-            type: 'AppSyncError',
-            errors,
-            errorsCount: errors.length,
-          },
-        } as unknown as TResult
-        request.error = null
-        return
-      }
-
+      assertAppSyncEvent(request.event)
+      request.event.response = request.event.response || {}
+      request.event.response.headers = responseHeaders
+      const errors = request.error.errorItems()
       request.response = {
-        statusCode: opt.statusCode,
-        headers: responseHeaders,
-        body: JSON.stringify({
-          message: request.error.message,
-          errors: request.error.errors,
-        }),
+        error: {
+          type: 'AppSyncError',
+          errors,
+          errorsCount: errors.length,
+        },
       } as unknown as TResult
       request.error = null
     },
@@ -226,7 +198,7 @@ export function precognition<TEvent = any, TResult = any>(
 
 export function appsyncErrorHandler<TEvent, TResult>(): middy.MiddlewareObj<TEvent, TResult> {
   const onError: middy.MiddlewareFn<TEvent, TResult> = async (request) => {
-    if (!request.error || !isAppSyncEvent(request.event))
+    if (!request.error)
       return
 
     if (isAppSyncMappedError(request.error)) {
