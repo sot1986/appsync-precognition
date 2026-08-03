@@ -1,3 +1,10 @@
+## [0.7.2](https://github.com/sot1986/appsync-precognition/compare/v0.7.1...v0.7.2) (2026-08-02)
+
+
+### Bug Fixes
+
+* **middy:** improve error mapping and handling ([55c1aeb](https://github.com/sot1986/appsync-precognition/commit/55c1aebaa69f0c4f333d80d255766ad7afb048a2))
+
 # [0.7.0](https://github.com/sot1986/appsync-precognition/compare/v0.6.3...v0.7.0) (2026-08-02)
 
 
