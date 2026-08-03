@@ -1,3 +1,10 @@
+## [0.7.3](https://github.com/sot1986/appsync-precognition/compare/v0.7.2...v0.7.3) (2026-08-03)
+
+
+### Bug Fixes
+
+* **middy:** align AppSync error type and errorsCount property with VTL template ([fce79cd](https://github.com/sot1986/appsync-precognition/commit/fce79cd06b648ad260049ccbd434254b35fa74db))
+
 ## [0.7.2](https://github.com/sot1986/appsync-precognition/compare/v0.7.1...v0.7.2) (2026-08-02)
 
 
