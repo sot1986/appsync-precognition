@@ -13,16 +13,16 @@ describe('middy Precognition Middleware', () => {
     const data = event?.body
       ? (typeof event.body === 'string' ? JSON.parse(event.body) : event.body)
       : (event?.arguments ?? event)
-    const errors: Record<string, string[]> = {}
+    const errors: { path: string[], message: string }[] = []
 
     if (!data?.email) {
-      errors.email = ['Email is required']
+      errors.push({ path: ['email'], message: 'Email is required' })
     }
     if (data?.age && Number(data.age) < 18) {
-      errors.age = ['Age must be at least 18']
+      errors.push({ path: ['age'], message: 'Age must be at least 18' })
     }
 
-    if (Object.keys(errors).length > 0) {
+    if (errors.length > 0) {
       throw new PrecognitionValidationError('Validation failed', errors)
     }
 
@@ -63,7 +63,10 @@ describe('middy Precognition Middleware', () => {
     expect(response.statusCode).toBe(422)
     const body = JSON.parse(response.body)
     expect(body.message).toBe('Validation failed')
-    expect(body.errors.email).toEqual(['Email is required'])
+    expect(body.errors).toEqual([
+      { path: ['email'], message: 'Email is required' },
+      { path: ['age'], message: 'Age must be at least 18' },
+    ])
   })
 
   it('handles successful precognitive validation request (early 204)', async () => {
@@ -92,7 +95,10 @@ describe('middy Precognition Middleware', () => {
     expect(response.statusCode).toBe(422)
     expect(response.headers.Precognition).toBe('true')
     const body = JSON.parse(response.body)
-    expect(body.errors.email).toEqual(['Email is required'])
+    expect(body.errors).toEqual([
+      { path: ['email'], message: 'Email is required' },
+      { path: ['age'], message: 'Age must be at least 18' },
+    ])
   })
 
   it('respects Precognition-Validate-Only header', async () => {
@@ -102,7 +108,7 @@ describe('middy Precognition Middleware', () => {
         'Precognition': 'true',
         'Precognition-Validate-Only': 'age',
       },
-      body: { age: 25 },
+      body: { email: 'valid@example.com', age: 25 },
     }, mockContext)
 
     expect(response.statusCode).toBe(204)
@@ -118,8 +124,11 @@ describe('middy Precognition Middleware', () => {
     })
 
     expect(err.statusCode).toBe(422)
-    expect(err.errors['user.email']).toEqual(['Email format invalid', 'Email domain not allowed'])
-    expect(err.errors['user.name']).toEqual(['Name required'])
+    expect(err.errors).toEqual([
+      { path: ['user', 'email'], message: 'Email format invalid' },
+      { path: ['user', 'email'], message: 'Email domain not allowed' },
+      { path: ['user', 'name'], message: 'Name required' },
+    ])
   })
 
   it('supports PrecognitionValidationError instantiated with single string values in error map', () => {
@@ -127,7 +136,9 @@ describe('middy Precognition Middleware', () => {
       email: 'Email is required',
     })
 
-    expect(err.errors.email).toEqual(['Email is required'])
+    expect(err.errors).toEqual([
+      { path: ['email'], message: 'Email is required' },
+    ])
   })
 
   it('supports passing validator function directly as shortcut argument', async () => {
@@ -161,19 +172,19 @@ describe('middy Precognition Middleware', () => {
 
       expect(response).toEqual({
         error: {
-          type: 'AppsyncError',
+          type: 'AppSyncError',
           errors: [
-            { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: 'email' } },
-            { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: 'age' } },
+            { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: ['email'], value: undefined } },
+            { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: ['age'], value: undefined } },
           ],
-          errorCount: 2,
+          errorsCount: 2,
         },
       })
     })
 
     it('supports custom toValidationErrors callback', async () => {
       class ThirdPartyCustomError extends Error {
-        public details = { email: 'Email is invalid format' }
+        public details = [{ path: ['email'], message: 'Email is invalid format' }]
       }
 
       const thirdPartyValidator = () => {
@@ -185,7 +196,7 @@ describe('middy Precognition Middleware', () => {
           validator: thirdPartyValidator,
           toValidationErrors: (err: Error) => {
             if (err instanceof ThirdPartyCustomError)
-              return { message: err.message, errors: err.details }
+              return err.details
 
             return null
           },
@@ -195,11 +206,11 @@ describe('middy Precognition Middleware', () => {
 
       expect(response).toEqual({
         error: {
-          type: 'AppsyncError',
+          type: 'AppSyncError',
           errors: [
-            { message: 'Validation failed in third party library', errorType: 'ValidationError', errorInfo: { path: 'email' } },
+            { message: 'Email is invalid format', errorType: 'ValidationError', errorInfo: { path: ['email'], value: undefined } },
           ],
-          errorCount: 1,
+          errorsCount: 1,
         },
       })
     })
@@ -219,9 +230,9 @@ describe('middy Precognition Middleware', () => {
       const res = await handler(appsyncEvent, mockContext)
       expect(res).toEqual({
         error: {
-          type: 'AppsyncError',
+          type: 'AppSyncError',
           errors: [{ message: 'Resource not found', errorType: 'NotFoundError', errorInfo: { id: '123' } }],
-          errorCount: 1,
+          errorsCount: 1,
         },
       })
     })
@@ -255,9 +266,9 @@ describe('middy Precognition Middleware', () => {
       const res = await handler(appsyncEvent, mockContext)
       expect(res).toEqual({
         error: {
-          type: 'AppsyncError',
+          type: 'AppSyncError',
           errors: [{ message: 'Custom mapped error', errorType: 'CustomType', errorInfo: null }],
-          errorCount: 1,
+          errorsCount: 1,
         },
       })
     })

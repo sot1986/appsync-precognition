@@ -49,47 +49,41 @@ $util.toJson($ctx.result)
 
 export class PrecognitionValidationError extends Error implements AppSyncMappedError {
   public override readonly name: string = 'ValidationError'
-  public readonly errors: Record<string, string[]>
+  public readonly errors: { value?: unknown, path: string[], message: string }[]
   public readonly statusCode: number
 
   constructor(
     message: string = 'The given data was invalid.',
-    errors: Record<string, string | string[]>,
+    errors: { value?: unknown, path: string | string[], message: string }[] | Record<string, string | string[]>,
     statusCode: number = 422,
   ) {
     super(message)
     Object.setPrototypeOf(this, PrecognitionValidationError.prototype)
     this.statusCode = statusCode
-    const errorEntries = Object.entries(errors)
-    if (!errorEntries.length)
-      throw new Error('No errors provided')
 
-    this.errors = errorEntries.reduce((acc, [path, val]) => {
-      const value = typeof val === 'string' ? [val] : val
-      if (path in acc)
-        acc[path].push(...value)
-      else
-        acc[path] = [...value]
-      return acc
-    }, {} as Record<string, string[]>)
+    this.errors = (Array.isArray(errors))
+      ? errors.map(err => ({ ...err, path: typeof err.path === 'string'
+          ? err.path.split('.')
+          : err.path }))
+      : Object.entries(errors).flatMap(([pathKey, val]) => {
+          const messages = typeof val === 'string' ? [val] : val
+          return messages.map(msg => ({ path: pathKey.split('.'), message: msg }))
+        })
+
+    if (!this.errors.length)
+      throw new Error('No errors provided')
   }
 
   public errorItems(): AppSyncErrorItem[] {
-    const customMessage = (this.message && this.message !== 'The given data was invalid.' && this.message !== 'Validation failed')
-      ? this.message
-      : null
+    return this.errors.map(error => ({
+      message: error.message,
+      errorType: 'ValidationError',
+      errorInfo: { path: error.path, value: error.value },
+    }))
+  }
 
-    const items: AppSyncErrorItem[] = Object.entries(this.errors).flatMap(([path, messages]) =>
-      messages.map(message => ({
-        message: customMessage ?? message,
-        errorType: 'ValidationError',
-        errorInfo: { path },
-      })),
-    )
-
-    return items.length > 0
-      ? items
-      : [{ message: this.message, errorType: 'ValidationError', errorInfo: null }]
+  public validationErrors(): { value?: unknown, path: string[], message: string }[] {
+    return this.errors
   }
 }
 
@@ -121,7 +115,7 @@ function resolveOptions<TEvent>(
     successHeaderName: opt.successHeaderName ?? 'Precognition-Success',
     statusCode: opt.statusCode ?? 422,
     resolveRequestHeaders: opt.resolveRequestHeaders ?? resolveRequestHeaders,
-    toValidationErrors: opt.toValidationErrors ?? (() => null),
+    toValidationErrors: opt.toValidationErrors ?? ((error: Error) => hasValidationErrors(error) ? error.validationErrors : null),
     validator: opt.validator,
   }
 }
@@ -160,24 +154,25 @@ export function precognition<TEvent = any, TResult = any>(
         if (error instanceof Error === false)
           throw new Error(String(error))
 
-        const validationError = error instanceof PrecognitionValidationError
-          ? error
-          : opt.toValidationErrors(error)
-        if (!validationError)
+        const validationErrors = opt.toValidationErrors(error)
+
+        if (!validationErrors)
           throw error
 
         const validationKeys = headers.get(opt.validateOnlyHeaderName)
         if (!validationKeys)
-          throw new PrecognitionValidationError(validationError.message, validationError.errors)
+          throw new PrecognitionValidationError(error.message, validationErrors)
 
         const keys = validationKeys.split(',')
-        Object.keys(validationError.errors).forEach((key) => {
-          if (!keys.includes(key))
-            delete validationError.errors[key]
+        const precognitiveErrors: { value?: unknown, path: string[], message: string }[] = []
+        validationErrors.forEach((key) => {
+          const pathKey = key.path.join('.')
+          if (keys.includes(pathKey))
+            precognitiveErrors.push({ ...key })
         })
 
-        if (Object.keys(validationError.errors).length > 0)
-          throw new PrecognitionValidationError(validationError.message, validationError.errors)
+        if (Object.keys(precognitiveErrors).length > 0)
+          throw new PrecognitionValidationError(error.message, precognitiveErrors)
 
         if (isAppSyncEvent(request.event)) {
           request.event.response = request.event.response || {}
@@ -207,9 +202,9 @@ export function precognition<TEvent = any, TResult = any>(
         const errors = request.error.errorItems()
         request.response = {
           error: {
-            type: 'AppsyncError',
+            type: 'AppSyncError',
             errors,
-            errorCount: errors.length,
+            errorsCount: errors.length,
           },
         } as unknown as TResult
         request.error = null
@@ -237,9 +232,9 @@ export function appsyncErrorHandler<TEvent, TResult>(): middy.MiddlewareObj<TEve
     if (isAppSyncMappedError(request.error)) {
       const errorItems = typeof request.error.errorItems === 'function' ? request.error.errorItems() : request.error.errorItems
       request.response = { error: {
-        type: 'AppsyncError',
+        type: 'AppSyncError',
         errors: errorItems,
-        errorCount: errorItems.length,
+        errorsCount: errorItems.length,
       } } as unknown as TResult
       request.error = null
     }
@@ -270,4 +265,10 @@ function resolveResponseHeaders<TEvent>(
 
 function isAppSyncMappedError(error: object): error is AppSyncMappedError {
   return Boolean(error && typeof error === 'object' && 'errorItems' in error && (typeof (error as any).errorItems === 'function' || Array.isArray((error as any).errorItems)))
+}
+
+function hasValidationErrors(error: object): error is {
+  validationErrors: { value?: unknown, path: string[], message: string }[]
+} {
+  return Boolean(error && typeof error === 'object' && 'validationErrors' in error && Array.isArray((error as any).validationErrors))
 }

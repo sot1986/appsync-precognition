@@ -213,10 +213,11 @@ export interface PrecognitionOptions<TInput> {
    * Converts an error to validation errors.
    * If returns `null` or `undefined`, the error will propagate as is.
    */
-  toValidationErrors?: (error: Error) => {
+  toValidationErrors?: (error: Error) => ({
+    value?: unknown
+    path: string[]
     message: string
-    errors: Record<string, string | string[]>
-  } | null | undefined
+  }[]) | null | undefined
   /**
    * Returns the headers of the request event.
    * Default to checking for `event.request.headers` and `event.headers`.
