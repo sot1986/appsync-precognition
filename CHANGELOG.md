@@ -1,3 +1,10 @@
+## [0.7.4](https://github.com/sot1986/appsync-precognition/compare/v0.7.3...v0.7.4) (2026-08-03)
+
+
+### Bug Fixes
+
+* **middy:** remove non-appsync event branch and enforce appsync event structure ([8554df8](https://github.com/sot1986/appsync-precognition/commit/8554df891d5157fe19a5d11aeabde36fad84d7a8))
+
 ## [0.7.3](https://github.com/sot1986/appsync-precognition/compare/v0.7.2...v0.7.3) (2026-08-03)
 
 
