@@ -1,3 +1,10 @@
+## [0.7.5](https://github.com/sot1986/appsync-precognition/compare/v0.7.4...v0.7.5) (2026-08-03)
+
+
+### Bug Fixes
+
+* **middy:** normalize validation error path to dot-separated string ([b7808c1](https://github.com/sot1986/appsync-precognition/commit/b7808c1780e5c56b21a91e7ff0e908e5a114613e))
+
 ## [0.7.4](https://github.com/sot1986/appsync-precognition/compare/v0.7.3...v0.7.4) (2026-08-03)
 
 
