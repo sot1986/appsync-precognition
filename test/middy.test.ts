@@ -11,13 +11,13 @@ import {
 describe('middy Precognition Middleware', () => {
   const dummyValidator: any = (event: any) => {
     const data = event?.arguments ?? event?.body ?? event
-    const errors: { path: string[], message: string }[] = []
+    const errors: { path: string, message: string }[] = []
 
     if (!data?.email) {
-      errors.push({ path: ['email'], message: 'Email is required' })
+      errors.push({ path: 'email', message: 'Email is required' })
     }
     if (data?.age && Number(data.age) < 18) {
-      errors.push({ path: ['age'], message: 'Age must be at least 18' })
+      errors.push({ path: 'age', message: 'Age must be at least 18' })
     }
 
     if (errors.length > 0) {
@@ -58,8 +58,8 @@ describe('middy Precognition Middleware', () => {
       error: {
         type: 'AppSyncError',
         errors: [
-          { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: ['email'], value: undefined } },
-          { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: ['age'], value: undefined } },
+          { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: 'email', value: undefined } },
+          { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: 'age', value: undefined } },
         ],
         errorsCount: 2,
       },
@@ -100,8 +100,8 @@ describe('middy Precognition Middleware', () => {
       error: {
         type: 'AppSyncError',
         errors: [
-          { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: ['email'], value: undefined } },
-          { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: ['age'], value: undefined } },
+          { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: 'email', value: undefined } },
+          { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: 'age', value: undefined } },
         ],
         errorsCount: 2,
       },
@@ -135,9 +135,9 @@ describe('middy Precognition Middleware', () => {
 
     expect(err.statusCode).toBe(422)
     expect(err.errors).toEqual([
-      { path: ['user', 'email'], message: 'Email format invalid' },
-      { path: ['user', 'email'], message: 'Email domain not allowed' },
-      { path: ['user', 'name'], message: 'Name required' },
+      { path: 'user.email', message: 'Email format invalid' },
+      { path: 'user.email', message: 'Email domain not allowed' },
+      { path: 'user.name', message: 'Name required' },
     ])
   })
 
@@ -147,7 +147,7 @@ describe('middy Precognition Middleware', () => {
     })
 
     expect(err.errors).toEqual([
-      { path: ['email'], message: 'Email is required' },
+      { path: 'email', message: 'Email is required' },
     ])
   })
 
@@ -185,8 +185,8 @@ describe('middy Precognition Middleware', () => {
         error: {
           type: 'AppSyncError',
           errors: [
-            { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: ['email'], value: undefined } },
-            { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: ['age'], value: undefined } },
+            { message: 'Email is required', errorType: 'ValidationError', errorInfo: { path: 'email', value: undefined } },
+            { message: 'Age must be at least 18', errorType: 'ValidationError', errorInfo: { path: 'age', value: undefined } },
           ],
           errorsCount: 2,
         },
@@ -195,7 +195,7 @@ describe('middy Precognition Middleware', () => {
 
     it('supports custom toValidationErrors callback', async () => {
       class ThirdPartyCustomError extends Error {
-        public details = [{ path: ['email'], message: 'Email is invalid format' }]
+        public details = [{ path: 'email', message: 'Email is invalid format' }]
       }
 
       const thirdPartyValidator = () => {
@@ -219,7 +219,7 @@ describe('middy Precognition Middleware', () => {
         error: {
           type: 'AppSyncError',
           errors: [
-            { message: 'Email is invalid format', errorType: 'ValidationError', errorInfo: { path: ['email'], value: undefined } },
+            { message: 'Email is invalid format', errorType: 'ValidationError', errorInfo: { path: 'email', value: undefined } },
           ],
           errorsCount: 1,
         },

@@ -215,7 +215,7 @@ export interface PrecognitionOptions<TInput> {
    */
   toValidationErrors?: (error: Error) => ({
     value?: unknown
-    path: string[]
+    path: string | string[]
     message: string
   }[]) | null | undefined
   /**

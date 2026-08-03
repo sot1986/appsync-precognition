@@ -49,7 +49,7 @@ $util.toJson($ctx.result)
 
 export class PrecognitionValidationError extends Error implements AppSyncMappedError {
   public override readonly name: string = 'ValidationError'
-  public readonly errors: { value?: unknown, path: string[], message: string }[]
+  public readonly errors: { value?: unknown, path: string, message: string }[]
   public readonly statusCode: number
 
   constructor(
@@ -62,12 +62,13 @@ export class PrecognitionValidationError extends Error implements AppSyncMappedE
     this.statusCode = statusCode
 
     this.errors = (Array.isArray(errors))
-      ? errors.map(err => ({ ...err, path: typeof err.path === 'string'
-          ? err.path.split('.')
-          : err.path }))
+      ? errors.map(err => ({
+          ...err,
+          path: Array.isArray(err.path) ? err.path.join('.') : err.path,
+        }))
       : Object.entries(errors).flatMap(([pathKey, val]) => {
           const messages = typeof val === 'string' ? [val] : val
-          return messages.map(msg => ({ path: pathKey.split('.'), message: msg }))
+          return messages.map(msg => ({ path: pathKey, message: msg }))
         })
 
     if (!this.errors.length)
@@ -82,7 +83,7 @@ export class PrecognitionValidationError extends Error implements AppSyncMappedE
     }))
   }
 
-  public validationErrors(): { value?: unknown, path: string[], message: string }[] {
+  public validationErrors(): { value?: unknown, path: string, message: string }[] {
     return this.errors
   }
 }
@@ -155,9 +156,9 @@ export function precognition<TEvent = any, TResult = any>(
           throw new PrecognitionValidationError(error.message, validationErrors)
 
         const keys = validationKeys.split(',')
-        const precognitiveErrors: { value?: unknown, path: string[], message: string }[] = []
+        const precognitiveErrors: { value?: unknown, path: string | string[], message: string }[] = []
         validationErrors.forEach((key) => {
-          const pathKey = key.path.join('.')
+          const pathKey = Array.isArray(key.path) ? key.path.join('.') : key.path
           if (keys.includes(pathKey))
             precognitiveErrors.push({ ...key })
         })
@@ -240,7 +241,7 @@ function isAppSyncMappedError(error: object): error is AppSyncMappedError {
 }
 
 function hasValidationErrors(error: object): error is {
-  validationErrors: { value?: unknown, path: string[], message: string }[]
+  validationErrors: { value?: unknown, path: string | string[], message: string }[]
 } {
   return Boolean(error && typeof error === 'object' && 'validationErrors' in error && Array.isArray((error as any).validationErrors))
 }
